@@ -408,13 +408,13 @@
 
   @media print{header.top,aside,.cta,.report-actions,.ghost-btn,.doc-btn,.scan-form,.scan-note,.tabs,.tabnav{display:none!important;}
     body{background:#fff;} .layout{grid-template-columns:1fr;}}
+  #printArea{display:none;}
   @media print{
-    body.printing-doc *{visibility:hidden!important;}
-    body.printing-doc .doc-page.printing, body.printing-doc .doc-page.printing *{visibility:visible!important;
-      -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-    body.printing-doc .doc-page.printing{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:0;
-      border-radius:0;margin:0;padding:6mm 4mm;}
-    body.printing-doc .doc-page.printing:focus-visible{outline:none;}
+    body.printing-doc > *:not(#printArea){display:none!important;}
+    body.printing-doc #printArea{display:block!important;}
+    body.printing-doc #printArea .doc-page{border:0;box-shadow:none;border-radius:0;margin:0;max-width:none;padding:6mm 5mm;}
+    body.printing-doc #printArea .doc-page, body.printing-doc #printArea .doc-page *{
+      -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;outline:none!important;}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
 </style>
@@ -620,6 +620,8 @@
     <b>Nota.</b> Questo strumento fornisce una valutazione <b>indicativa e automatizzata</b> a scopo di orientamento e non costituisce consulenza legale né garanzia di conformità. L'ambito di applicazione definitivo e la classificazione dell'entità (essenziale / importante) dipendono dal recepimento nazionale della direttiva e vanno verificati con l'autorità competente (in Italia, ACN). La responsabilità della conformità resta in capo all'organizzazione e al suo organo di gestione.
   </p>
 </div>
+
+<div id="printArea" aria-hidden="true"></div>
 
 <script>
 const MEASURES = [
@@ -1534,14 +1536,19 @@ function genDocs(scroll){
   if(scroll!==false) document.getElementById('docStep').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function printDoc(i){
-  const pages=document.querySelectorAll('.doc-page');
-  pages.forEach((pg,idx)=>pg.classList.toggle('printing', idx===i));
+  const src=document.getElementById('docpage-'+i);
+  const pa=document.getElementById('printArea');
+  if(!src||!pa) return;
+  const clone=src.cloneNode(true);
+  clone.removeAttribute('contenteditable');
+  clone.classList.remove('editing');
+  pa.innerHTML=''; pa.appendChild(clone);
   document.body.classList.add('printing-doc');
   window.print();
 }
 window.addEventListener('afterprint',()=>{
   document.body.classList.remove('printing-doc');
-  document.querySelectorAll('.doc-page.printing').forEach(pg=>pg.classList.remove('printing'));
+  const pa=document.getElementById('printArea'); if(pa) pa.innerHTML='';
 });
 document.getElementById('docGenBtn').addEventListener('click',()=>{ genDocs(false); showTab(3); });
 document.getElementById('docList').addEventListener('click',e=>{
