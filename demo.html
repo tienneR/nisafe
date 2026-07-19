@@ -432,6 +432,7 @@
       <button class="lang-btn active" data-lang="it" type="button">IT</button>
       <button class="lang-btn" data-lang="en" type="button">EN</button>
     </div>
+    <button class="ghost-btn" id="demoBtn" data-i18n="demo_fill">✨ Dati di esempio</button>
     <button class="ghost-btn" id="resetBtn" data-i18n="reset">Ricomincia</button>
   </div>
 </header>
@@ -745,7 +746,7 @@ const EN = {
   }
 };
 const T = {
-  it:{ brand_tag:"Conformità NIS2 in autonomia", reset:"Ricomincia",
+  it:{ brand_tag:"Conformità NIS2 in autonomia", reset:"Ricomincia", demo_fill:"✨ Dati di esempio",
     eyebrow:"Autovalutazione · Direttiva UE 2022/2555",
     h1:"Metti in regola la tua azienda con la <span class=\"hl\">NIS2</span>. Da solo, in 5 minuti.",
     intro_p:"Rispondi alle domande sulle misure di sicurezza previste dall'art. 21.<br>NISafe calcola il tuo livello di conformità e genera una <strong>roadmap prioritizzata</strong> e i <strong>documenti</strong> pronti. Nessuna consulenza, nessun costo nascosto.",
@@ -790,7 +791,7 @@ const T = {
     v_ess_t:"Probabile entità essenziale", v_ess_d:"Grande impresa in un settore ad alta criticità: soggetta agli obblighi NIS2 con il regime di vigilanza più stringente. Registrazione presso l'autorità e piena attuazione dell'art. 21.",
     v_imp_t:"Probabile entità importante", v_imp_d:"Rientri con ogni probabilità tra le entità importanti: obblighi dell'art. 21 e notifica degli incidenti, con vigilanza ex-post. Procedi con l'autovalutazione qui sotto.",
   },
-  en:{ brand_tag:"NIS2 compliance, on your own", reset:"Start over",
+  en:{ brand_tag:"NIS2 compliance, on your own", reset:"Start over", demo_fill:"✨ Sample data",
     eyebrow:"Self-assessment · EU Directive 2022/2555",
     h1:"Get your company <span class=\"hl\">NIS2</span>-ready. On your own, in 5 minutes.",
     intro_p:"Answer the questions on the security measures required by Article 21.<br>NISafe calculates your compliance level and generates a <strong>prioritised roadmap</strong> and ready-to-use <strong>documents</strong>. No consultants, no hidden costs.",
@@ -1714,6 +1715,32 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   recompute();
   showTab(0);
 });
+
+// ---- demo autofill ----
+function populateDemo(){
+  const companies = lang==='en'
+    ? ['Rossi Manufacturing Ltd','Bianchi Components Plc','NordServ ICT','Aurora Foods','MedTech Devices']
+    : ['Rossi Manifattura S.r.l.','Bianchi Componenti S.p.A.','NordServ ICT S.r.l.','Aurora Alimentari S.p.A.','MedTech Dispositivi S.r.l.'];
+  document.getElementById('company').value = companies[Math.floor(Math.random()*companies.length)];
+  const opts=[...sectorSel.options].filter(o=>o.value==='hi'||o.value==='lo');
+  opts[Math.floor(Math.random()*opts.length)].selected=true;
+  sizeSel.value = Math.random()<0.5 ? 'medium' : 'large';
+  verdict();
+  const vals=['si','si','parz','no','parz','si','no','parz'];
+  for(const k in answers) delete answers[k];
+  MEASURES.forEach((m,mi)=>m.q.forEach((q,qi)=>{
+    if(!isActive(mi,qi)) return;
+    answers['q_'+mi+'_'+qi] = vals[Math.floor(Math.random()*vals.length)];
+  }));
+  renderMeasures();
+  recompute();
+  document.getElementById('domain').value = 'esempio-'+(Math.floor(Math.random()*900)+100)+'.it';
+  genReport(false);
+  genDocs(false);
+  renderScan(document.getElementById('domain').value);
+  showTab(3);
+}
+document.getElementById('demoBtn').addEventListener('click',populateDemo);
 
 // ---- tabs ----
 function showTab(i){
