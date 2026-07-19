@@ -1,0 +1,1671 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>NISafe — Autovalutazione NIS2</title>
+<style>
+  :root{
+    --bg:#F1F4F9; --surface:#FFFFFF; --surface-2:#EAEEF6; --surface-3:#E1E7F1;
+    --border:#D7DEEA; --border-strong:#C3CDDD;
+    --text:#141C2A; --muted:#586377; --faint:#8A93A5;
+    --accent:#2E56E6; --accent-ink:#1A3AB0; --accent-weak:rgba(46,86,230,.10);
+    --good:#178A57; --good-weak:rgba(23,138,87,.12);
+    --warn:#C67C12; --warn-weak:rgba(198,124,18,.14);
+    --crit:#CE343C; --crit-weak:rgba(206,52,60,.12);
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+    --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,"SF Mono","SFMono-Regular",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0B0F16; --surface:#141A25; --surface-2:#1A2130; --surface-3:#222B3B;
+      --border:#28313F; --border-strong:#38455A;
+      --text:#E7ECF4; --muted:#8E99AC; --faint:#69748A;
+      --accent:#5C85FF; --accent-ink:#A8BEFF; --accent-weak:rgba(92,133,255,.14);
+      --good:#33B47B; --good-weak:rgba(51,180,123,.15);
+      --warn:#E3A23E; --warn-weak:rgba(227,162,62,.16);
+      --crit:#F0656E; --crit-weak:rgba(240,101,110,.16);
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F1F4F9; --surface:#FFFFFF; --surface-2:#EAEEF6; --surface-3:#E1E7F1;
+    --border:#D7DEEA; --border-strong:#C3CDDD;
+    --text:#141C2A; --muted:#586377; --faint:#8A93A5;
+    --accent:#2E56E6; --accent-ink:#1A3AB0; --accent-weak:rgba(46,86,230,.10);
+    --good:#178A57; --good-weak:rgba(23,138,87,.12);
+    --warn:#C67C12; --warn-weak:rgba(198,124,18,.14);
+    --crit:#CE343C; --crit-weak:rgba(206,52,60,.12);
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0F16; --surface:#141A25; --surface-2:#1A2130; --surface-3:#222B3B;
+    --border:#28313F; --border-strong:#38455A;
+    --text:#E7ECF4; --muted:#8E99AC; --faint:#69748A;
+    --accent:#5C85FF; --accent-ink:#A8BEFF; --accent-weak:rgba(92,133,255,.14);
+    --good:#33B47B; --good-weak:rgba(51,180,123,.15);
+    --warn:#E3A23E; --warn-weak:rgba(227,162,62,.16);
+    --crit:#F0656E; --crit-weak:rgba(240,101,110,.16);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px 96px;}
+
+  /* Header */
+  header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);margin-bottom:28px;}
+  .top-in{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:650;letter-spacing:-.01em;font-size:1.06rem;}
+  .mark{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--accent),var(--accent-ink));color:#fff;box-shadow:var(--shadow);}
+  .mark svg{width:17px;height:17px;display:block}
+  .brand small{display:block;font-weight:450;color:var(--muted);font-size:.72rem;letter-spacing:.02em;margin-top:-2px;}
+  .top-spacer{flex:1}
+  .ghost-btn{font:inherit;font-size:.82rem;color:var(--muted);background:none;border:1px solid var(--border);
+    padding:7px 13px;border-radius:8px;cursor:pointer;transition:.15s;}
+  .ghost-btn:hover{color:var(--text);border-color:var(--border-strong);}
+  .lang-switch{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .lang-btn{font:inherit;font-size:.75rem;font-weight:600;padding:6px 11px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.14s;}
+  .lang-btn:hover{color:var(--text);}
+  .lang-btn.active{background:var(--accent);color:#fff;}
+
+  /* Hero / intro */
+  .intro{margin:8px 0 30px;}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  .intro h1{font-size:clamp(1.7rem,3.4vw,2.35rem);line-height:1.1;letter-spacing:-.025em;
+    margin:.5rem 0 .55rem;text-wrap:balance;font-weight:700;}
+  .intro p{color:var(--muted);max-width:60ch;font-size:1.02rem;margin:0;}
+
+  /* Hero */
+  .hero{position:relative;margin:14px 0 38px;padding:6px 0;isolation:isolate;}
+  .hero-glow{position:absolute;top:-80px;left:-60px;width:min(560px,80%);height:280px;z-index:-1;pointer-events:none;
+    background:radial-gradient(60% 60% at 30% 40%, color-mix(in srgb,var(--accent) 26%,transparent), transparent 70%);
+    filter:blur(20px);opacity:.7;}
+  .hero h1{font-size:clamp(2.1rem,5vw,3.15rem);line-height:1.06;letter-spacing:-.035em;font-weight:800;
+    margin:.55rem 0 .7rem;text-wrap:balance;max-width:18ch;}
+  .hero .hl{background:linear-gradient(115deg,var(--accent),var(--accent-ink));-webkit-background-clip:text;
+    background-clip:text;color:transparent;}
+  .hero p{color:var(--muted);max-width:62ch;font-size:1.08rem;line-height:1.55;margin:0;}
+  .hero-chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:.83rem;font-weight:600;color:var(--text);
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:8px 14px;box-shadow:var(--shadow);}
+  .chip .ck{display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--good);color:#fff;
+    font-size:.62rem;font-weight:800;flex:none;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:8px;margin:6px 0 26px;flex-wrap:wrap;}
+  .tab{flex:1 1 150px;display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);
+    border-radius:12px;background:var(--surface);cursor:pointer;color:var(--muted);font:inherit;transition:.15s;
+    text-align:left;box-shadow:var(--shadow);}
+  .tab:hover{border-color:var(--border-strong);color:var(--text);}
+  .tab.active{border-color:var(--accent);background:var(--accent-weak);color:var(--accent-ink);}
+  .tab .tnum{font-family:var(--font-mono);font-size:.8rem;font-weight:600;width:27px;height:27px;border-radius:7px;
+    display:grid;place-items:center;background:var(--surface-2);color:var(--muted);flex:none;transition:.15s;}
+  .tab.active .tnum{background:var(--accent);color:#fff;}
+  .tab.done .tnum{background:var(--good);color:#fff;}
+  .tab.done .tnum::after{content:"✓";}
+  .tab.done .tnum{font-size:0;}
+  .tab.done .tnum::after{font-size:.9rem;}
+  .tab .tlab{font-size:.9rem;font-weight:600;letter-spacing:-.01em;}
+  @media (max-width:560px){.tab{flex:1 1 auto;padding:10px 12px;} .tab .tlab{font-size:.82rem;}}
+
+  .tabpanel{animation:fade .25s ease;}
+  .tabpanel[hidden]{display:none;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion:reduce){.tabpanel{animation:none;}}
+
+  .assess-layout{display:grid;grid-template-columns:minmax(0,1fr) 328px;gap:32px;align-items:start;}
+  @media (max-width:900px){.assess-layout{grid-template-columns:1fr;}}
+
+  .step-head{display:flex;align-items:baseline;gap:12px;margin:0 0 16px;flex-wrap:wrap;}
+  .step-head h2{font-size:1.3rem;letter-spacing:-.02em;margin:0;font-weight:700;}
+  .step-head span.hint{color:var(--faint);font-size:.85rem;}
+
+  .tabnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:28px;}
+  .tabnav .cta{width:auto;margin:0;}
+
+  .empty-hint{padding:44px 22px;text-align:center;color:var(--muted);border:1px dashed var(--border-strong);
+    border-radius:14px;font-size:.92rem;}
+  .empty-hint[hidden]{display:none;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);}
+
+  /* Scoping */
+  .scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;}
+  @media (max-width:560px){.scope-grid{grid-template-columns:1fr;}}
+  .field-full{grid-column:1/-1;}
+  .field input[type=text]{width:100%;font:inherit;font-size:.92rem;padding:11px 12px;border-radius:10px;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text);}
+  .field input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  .field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:7px;color:var(--text);}
+  .field select{width:100%;font:inherit;font-size:.92rem;padding:11px 12px;border-radius:10px;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text);cursor:pointer;
+    appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23888' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;}
+  .field select:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+
+  .verdict{margin:0 20px 20px;border-radius:12px;padding:16px 18px;border:1px solid var(--border);
+    background:var(--surface-2);display:flex;gap:14px;align-items:flex-start;}
+  .verdict .vico{width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;font-weight:700;
+    background:var(--surface-3);color:var(--muted);}
+  .verdict .vtitle{font-weight:650;font-size:1.02rem;letter-spacing:-.01em;}
+  .verdict .vdesc{color:var(--muted);font-size:.88rem;margin-top:3px;}
+  .verdict.ess{background:var(--crit-weak);border-color:color-mix(in srgb,var(--crit) 30%,transparent);}
+  .verdict.ess .vico{background:var(--crit);color:#fff;}
+  .verdict.imp{background:var(--warn-weak);border-color:color-mix(in srgb,var(--warn) 30%,transparent);}
+  .verdict.imp .vico{background:var(--warn);color:#fff;}
+  .verdict.out{background:var(--good-weak);border-color:color-mix(in srgb,var(--good) 28%,transparent);}
+  .verdict.out .vico{background:var(--good);color:#fff;}
+
+  /* Measures */
+  .measures{display:flex;flex-direction:column;gap:12px;}
+  .mode-switch{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .ms-btn{font:inherit;font-size:.83rem;font-weight:550;padding:8px 14px;border-radius:9px;cursor:pointer;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);transition:.14s;}
+  .ms-btn:hover{color:var(--text);border-color:var(--accent);}
+  .ms-btn.active{background:var(--accent-weak);border-color:var(--accent);color:var(--accent-ink);}
+  .ms-hint{font-size:.78rem;color:var(--faint);font-family:var(--font-mono);margin-left:4px;}
+  .qref{display:inline-block;font-family:var(--font-mono);font-size:.68rem;color:var(--faint);
+    background:var(--surface-2);border:1px solid var(--border);padding:1px 6px;border-radius:5px;
+    white-space:nowrap;vertical-align:middle;margin-left:2px;}
+  .measure{overflow:hidden;}
+  .m-head{display:flex;align-items:center;gap:13px;padding:15px 18px;cursor:pointer;user-select:none;}
+  .m-letter{font-family:var(--font-mono);font-weight:600;width:26px;height:26px;border-radius:7px;flex:none;
+    display:grid;place-items:center;font-size:.82rem;background:var(--surface-2);color:var(--muted);
+    text-transform:uppercase;}
+  .m-title{font-weight:600;font-size:.97rem;letter-spacing:-.01em;flex:1;}
+  .m-mini{font-family:var(--font-mono);font-size:.76rem;color:var(--faint);flex:none;}
+  .chev{width:16px;height:16px;flex:none;color:var(--faint);transition:transform .2s;}
+  .measure.open .chev{transform:rotate(180deg);}
+  .m-body{display:none;padding:2px 18px 16px;border-top:1px solid var(--border);}
+  .measure.open .m-body{display:block;}
+  .q{padding:13px 0;border-bottom:1px dashed var(--border);}
+  .q:last-child{border-bottom:0;}
+  .q-text{font-size:.9rem;margin-bottom:9px;color:var(--text);}
+  .opts{display:flex;gap:7px;flex-wrap:wrap;}
+  .opt{position:relative;}
+  .opt input{position:absolute;opacity:0;pointer-events:none;}
+  .opt span{display:inline-block;font-size:.8rem;padding:6px 13px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--border-strong);color:var(--muted);transition:.14s;font-weight:500;}
+  .opt:hover span{border-color:var(--accent);color:var(--text);}
+  .opt input:focus-visible + span{outline:2px solid var(--accent);outline-offset:1px;}
+  .opt[data-v="si"] input:checked + span{background:var(--good);border-color:var(--good);color:#fff;}
+  .opt[data-v="parz"] input:checked + span{background:var(--warn);border-color:var(--warn);color:#fff;}
+  .opt[data-v="no"] input:checked + span{background:var(--crit);border-color:var(--crit);color:#fff;}
+  .opt[data-v="na"] input:checked + span{background:var(--surface-3);border-color:var(--border-strong);color:var(--text);}
+
+  /* Aside panel */
+  aside{position:sticky;top:84px;}
+  @media (max-width:900px){aside{position:static;}}
+  .panel{padding:20px;text-align:center;}
+  .panel h3{font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 16px;
+    font-weight:650;font-family:var(--font-mono);}
+  .gauge{--p:0;--gc:var(--crit);width:148px;height:148px;border-radius:50%;margin:0 auto;position:relative;
+    background:conic-gradient(var(--gc) calc(var(--p)*3.6deg), var(--surface-2) 0);
+    transition:--p .5s ease;display:grid;place-items:center;}
+  .gauge::before{content:"";position:absolute;inset:13px;border-radius:50%;background:var(--surface);}
+  .gauge .num{position:relative;font-family:var(--font-mono);font-weight:600;font-size:2.15rem;letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;line-height:1;}
+  .gauge .num sup{font-size:.9rem;color:var(--muted);font-weight:500;top:-.7em;}
+  .gauge-cap{color:var(--muted);font-size:.83rem;margin-top:11px;}
+  .prog{margin-top:18px;font-size:.8rem;color:var(--faint);font-family:var(--font-mono);}
+  .prog b{color:var(--text);}
+
+  .bars{margin-top:20px;display:flex;flex-direction:column;gap:9px;text-align:left;}
+  .bar-row{display:grid;grid-template-columns:20px 1fr auto;gap:9px;align-items:center;}
+  .bar-row .bl{font-family:var(--font-mono);font-size:.74rem;color:var(--faint);text-transform:uppercase;}
+  .track{height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden;}
+  .fill{height:100%;border-radius:99px;width:0;transition:width .45s ease,background .3s;}
+  .bar-row .bv{font-family:var(--font-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:30px;text-align:right;}
+
+  .cta{font:inherit;font-weight:600;font-size:.92rem;width:100%;margin-top:22px;padding:12px;border-radius:11px;
+    border:0;cursor:pointer;color:#fff;background:linear-gradient(150deg,var(--accent),var(--accent-ink));
+    box-shadow:var(--shadow);transition:.15s;}
+  .cta:hover{filter:brightness(1.06);transform:translateY(-1px);}
+  .cta:disabled{opacity:.5;cursor:not-allowed;transform:none;filter:none;}
+
+  /* Report */
+  .report{margin-top:38px;scroll-margin-top:80px;}
+  .report[hidden]{display:none;}
+  .report-head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;
+    padding:22px;border-bottom:1px solid var(--border);}
+  .report-head h2{margin:0;font-size:1.3rem;letter-spacing:-.02em;}
+  .report-head p{margin:4px 0 0;color:var(--muted);font-size:.9rem;}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
+  @media (max-width:640px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--surface);padding:18px 20px;}
+  .stat .sv{font-family:var(--font-mono);font-size:1.7rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .stat .sl{font-size:.78rem;color:var(--muted);margin-top:2px;}
+  .stat.c-crit .sv{color:var(--crit);} .stat.c-warn .sv{color:var(--warn);} .stat.c-good .sv{color:var(--good);}
+
+  .road{padding:8px 22px 22px;}
+  .road h3{font-size:.95rem;margin:20px 0 4px;letter-spacing:-.01em;}
+  .road .sub{color:var(--muted);font-size:.85rem;margin:0 0 14px;}
+  .task{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--border);}
+  .task:last-child{border-bottom:0;}
+  .sev{font-family:var(--font-mono);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+    padding:3px 8px;border-radius:6px;height:fit-content;flex:none;white-space:nowrap;}
+  .sev.critica{background:var(--crit);color:#fff;}
+  .sev.alta{background:var(--crit-weak);color:var(--crit);border:1px solid color-mix(in srgb,var(--crit) 35%,transparent);}
+  .sev.media{background:var(--warn-weak);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);}
+  .sev.bassa{background:var(--surface-2);color:var(--muted);border:1px solid var(--border-strong);}
+  .task .tbody b{font-size:.92rem;font-weight:600;}
+  .task .tbody .tmeta{font-family:var(--font-mono);font-size:.72rem;color:var(--faint);margin-bottom:3px;text-transform:uppercase;letter-spacing:.03em;}
+  .task .tbody p{margin:5px 0 0;font-size:.87rem;color:var(--muted);}
+  .allgood{padding:26px 22px;text-align:center;color:var(--good);font-weight:600;}
+
+  .report-actions{padding:18px 22px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;}
+
+  /* About */
+  .about{margin:26px 0 8px;border-radius:16px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);
+    background:linear-gradient(135deg, var(--accent-weak), transparent 62%), var(--surface);}
+  .about-highlights{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .hl-badge{font-size:.8rem;font-weight:600;color:var(--text);background:var(--surface);border:1px solid var(--border-strong);
+    border-radius:999px;padding:6px 12px;line-height:1.2;}
+  .about-inner{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+  .about-avatar{width:72px;height:72px;border-radius:16px;flex:none;display:grid;place-items:center;overflow:hidden;
+    font-family:var(--font-mono);font-weight:700;font-size:1.4rem;color:#fff;align-self:flex-start;
+    background:linear-gradient(150deg,var(--accent),var(--accent-ink));box-shadow:var(--shadow);}
+  .about-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;}
+  .about-body{flex:1;min-width:240px;}
+  .about-eyebrow{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;
+    color:var(--accent);font-weight:600;}
+  .about-name{font-size:1.3rem;font-weight:700;letter-spacing:-.02em;margin-top:3px;display:flex;align-items:center;
+    gap:10px;flex-wrap:wrap;}
+  .about-role{font-size:.72rem;font-weight:600;color:var(--muted);background:var(--surface-2);border:1px solid var(--border);
+    padding:3px 9px;border-radius:999px;letter-spacing:0;}
+  .about-blurb{color:var(--muted);font-size:.92rem;margin:9px 0 0;max-width:62ch;line-height:1.5;}
+  .about-links{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .about-btn{display:inline-flex;align-items:center;font-size:.85rem;font-weight:600;text-decoration:none;
+    padding:9px 16px;border-radius:10px;border:1px solid var(--border-strong);color:var(--text);background:var(--surface);transition:.14s;}
+  .about-btn:hover{border-color:var(--accent);color:var(--accent-ink);}
+  .about-btn.primary{background:linear-gradient(150deg,var(--accent),var(--accent-ink));color:#fff;border:0;box-shadow:var(--shadow);}
+  .about-btn.primary:hover{filter:brightness(1.07);color:#fff;}
+
+  .disclaimer{margin-top:26px;font-size:.78rem;color:var(--faint);line-height:1.55;max-width:80ch;}
+  .disclaimer b{color:var(--muted);font-weight:600;}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:.78rem;color:var(--muted);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+  /* Documents */
+  .docs{padding:20px;}
+  .docs[hidden]{display:none;}
+  .doc-intro{color:var(--muted);font-size:.88rem;margin:0 0 16px;display:flex;gap:8px;align-items:flex-start;}
+  .doc-intro .ai-tag{font-family:var(--font-mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--accent);background:var(--accent-weak);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
+    padding:2px 7px;border-radius:6px;flex:none;}
+  .doc-list{display:flex;flex-direction:column;gap:12px;}
+  .doc-item{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface-2);}
+  .doc-h{display:flex;align-items:center;gap:12px;padding:13px 15px;}
+  .doc-ico{font-size:1.15rem;flex:none;}
+  .doc-meta{flex:1;min-width:0;}
+  .doc-meta b{font-size:.94rem;font-weight:600;display:block;letter-spacing:-.01em;}
+  .doc-meta small{color:var(--faint);font-family:var(--font-mono);font-size:.71rem;text-transform:uppercase;letter-spacing:.03em;}
+  .doc-btn{font:inherit;font-size:.78rem;font-weight:500;padding:6px 12px;border-radius:8px;cursor:pointer;flex:none;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);transition:.14s;}
+  .doc-btn:hover{color:var(--text);border-color:var(--accent);}
+  .doc-preview{margin:0;max-height:240px;overflow:auto;padding:16px;background:var(--surface);border-top:1px solid var(--border);
+    font-family:var(--font-mono);font-size:.75rem;line-height:1.65;white-space:pre-wrap;color:var(--text);}
+  .doc-edit{display:block;width:100%;box-sizing:border-box;border:0;border-top:1px solid var(--border);
+    background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:.75rem;line-height:1.65;
+    padding:16px;min-height:280px;max-height:440px;resize:vertical;white-space:pre-wrap;word-break:break-word;overflow:auto;}
+  .doc-edit:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+
+  /* Scanner */
+  .scan{padding:20px;}
+  .scan-intro{display:flex;gap:11px;align-items:flex-start;margin-bottom:15px;}
+  .scan-intro p{margin:0;color:var(--muted);font-size:.9rem;}
+  .demo-tag{font-family:var(--font-mono);font-size:.68rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--warn);background:var(--warn-weak);border:1px solid color-mix(in srgb,var(--warn) 32%,transparent);
+    padding:2px 7px;border-radius:6px;flex:none;}
+  .scan-form{display:flex;gap:10px;flex-wrap:wrap;}
+  .scan-form input{flex:1;min-width:200px;font:inherit;font-size:.95rem;padding:11px 13px;border-radius:10px;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-family:var(--font-mono);}
+  .scan-form input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  .scan-note{font-size:.76rem;color:var(--faint);line-height:1.5;margin:16px 0 0;}
+  .scan-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:18px 0 8px;}
+  @media (max-width:560px){.scan-summary{grid-template-columns:repeat(2,1fr);}}
+  .scan-summary .cell{background:var(--surface);padding:15px 12px;text-align:center;}
+  .scan-summary .cv{font-family:var(--font-mono);font-size:1.55rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .scan-summary .cl{font-size:.74rem;color:var(--muted);margin-top:2px;}
+  .scan-summary .cell.c-crit .cv{color:var(--crit);} .scan-summary .cell.c-warn .cv{color:var(--warn);} .scan-summary .cell.c-good .cv{color:var(--good);}
+  .sc-cell{cursor:pointer;transition:.14s;position:relative;}
+  .sc-cell:hover{background:var(--surface-2);}
+  .sc-cell.active{box-shadow:inset 0 0 0 2px var(--accent);}
+  .sc-cell:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+  .findings-empty{padding:26px 4px;text-align:center;color:var(--faint);font-size:.86rem;}
+  .findings-empty[hidden]{display:none;}
+  .finding{display:flex;gap:12px;padding:13px 2px;border-bottom:1px solid var(--border);align-items:flex-start;}
+  .finding:last-child{border-bottom:0;}
+  .f-dot{width:10px;height:10px;border-radius:3px;margin-top:5px;flex:none;}
+  .f-dot.ok{background:var(--good);} .f-dot.warn{background:var(--warn);} .f-dot.crit{background:var(--crit);}
+  .f-body{flex:1;min-width:0;}
+  .f-cat{font-family:var(--font-mono);font-size:.68rem;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;}
+  .f-body b{font-size:.9rem;font-weight:600;display:block;letter-spacing:-.01em;}
+  .f-body p{margin:3px 0 0;font-size:.83rem;color:var(--muted);}
+  .f-ref{display:inline-block;font-family:var(--font-mono);font-size:.67rem;color:var(--faint);
+    background:var(--surface-2);border:1px solid var(--border);padding:1px 6px;border-radius:5px;margin-top:5px;}
+  .fix{margin:9px 0 7px;padding:11px 13px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);}
+  .fix-t{font-family:var(--font-mono);font-size:.66rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);margin-bottom:7px;}
+  .fix-row{display:flex;gap:9px;align-items:flex-start;font-size:.83rem;color:var(--text);margin-top:4px;line-height:1.45;}
+  .fx{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:5px;
+    flex:none;margin-top:1px;}
+  .fx.ok{background:var(--good-weak);color:var(--good);border:1px solid color-mix(in srgb,var(--good) 32%,transparent);}
+  .fx.no{background:var(--crit-weak);color:var(--crit);border:1px solid color-mix(in srgb,var(--crit) 32%,transparent);}
+
+  @media print{header.top,aside,.cta,.report-actions,.ghost-btn,.doc-btn,.scan-form,.scan-note,.tabs,.tabnav{display:none!important;}
+    body{background:#fff;} .layout{grid-template-columns:1fr;}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3Z" fill="currentColor" opacity=".95"/><path d="m8.5 12 2.4 2.4L15.8 9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span>NISafe<small data-i18n="brand_tag">Conformità NIS2 in autonomia</small></span>
+    </div>
+    <div class="top-spacer"></div>
+    <div class="lang-switch" role="group" aria-label="Lingua / Language">
+      <button class="lang-btn active" data-lang="it" type="button">IT</button>
+      <button class="lang-btn" data-lang="en" type="button">EN</button>
+    </div>
+    <button class="ghost-btn" id="resetBtn" data-i18n="reset">Ricomincia</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Passi">
+    <button class="tab active" data-tab="0" type="button" role="tab"><span class="tnum">01</span><span class="tlab" data-i18n="tab1">Ambito</span></button>
+    <button class="tab" data-tab="1" type="button" role="tab"><span class="tnum">02</span><span class="tlab" data-i18n="tab2">Autovalutazione</span></button>
+    <button class="tab" data-tab="2" type="button" role="tab"><span class="tnum">03</span><span class="tlab" data-i18n="tab3">Report e documenti</span></button>
+    <button class="tab" data-tab="3" type="button" role="tab"><span class="tnum">04</span><span class="tlab" data-i18n="tab4">Scanner</span></button>
+  </nav>
+
+  <section class="tabpanel" data-panel="0">
+    <div class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="eyebrow" data-i18n="eyebrow">Autovalutazione · Direttiva UE 2022/2555</div>
+      <h1 data-i18n-html="h1">Metti in regola la tua azienda con la <span class="hl">NIS2</span>. Da solo, in 5 minuti.</h1>
+      <p data-i18n-html="intro_p">Rispondi alle domande sulle misure di sicurezza previste dall'art. 21.<br>NISafe calcola il tuo livello di conformità e genera una <strong>roadmap prioritizzata</strong> e i <strong>documenti</strong> pronti. Nessuna consulenza, nessun costo nascosto.</p>
+      <div class="hero-chips">
+        <span class="chip"><span class="ck">✓</span><span data-i18n="chip1">80% del percorso in autonomia</span></span>
+        <span class="chip"><span class="ck">✓</span><span data-i18n="chip2">Senza consulenze costose</span></span>
+        <span class="chip"><span class="ck">✓</span><span data-i18n="chip3">Report e documenti in 5 minuti</span></span>
+      </div>
+    </div>
+    <div class="step-head"><h2 data-i18n="step1">La NIS2 si applica a te?</h2></div>
+      <div class="card">
+        <div class="scope-grid">
+          <div class="field field-full">
+            <label for="company" data-i18n="lbl_company">Nome dell'azienda</label>
+            <input type="text" id="company" placeholder="Es. Rossi Manifattura S.r.l." data-i18n-ph="ph_company" autocomplete="organization">
+          </div>
+          <div class="field">
+            <label for="sector" data-i18n="lbl_sector">Settore di attività</label>
+            <select id="sector">
+              <option value="" data-it="Seleziona…" data-en="Select…">Seleziona…</option>
+              <optgroup data-it="Settori ad alta criticità (Allegato I)" data-en="High-criticality sectors (Annex I)" label="Settori ad alta criticità (Allegato I)">
+                <option value="hi" data-it="Energia" data-en="Energy">Energia</option>
+                <option value="hi" data-it="Trasporti" data-en="Transport">Trasporti</option>
+                <option value="hi" data-it="Banche / Mercati finanziari" data-en="Banking / Financial markets">Banche / Mercati finanziari</option>
+                <option value="hi" data-it="Sanità" data-en="Health">Sanità</option>
+                <option value="hi" data-it="Acqua potabile / Acque reflue" data-en="Drinking water / Waste water">Acqua potabile / Acque reflue</option>
+                <option value="hi" data-it="Infrastrutture digitali (cloud, datacenter, DNS)" data-en="Digital infrastructure (cloud, datacenter, DNS)">Infrastrutture digitali (cloud, datacenter, DNS)</option>
+                <option value="hi" data-it="Servizi ICT gestiti (B2B)" data-en="Managed ICT services (B2B)">Servizi ICT gestiti (B2B)</option>
+                <option value="hi" data-it="Pubblica amministrazione" data-en="Public administration">Pubblica amministrazione</option>
+                <option value="hi" data-it="Spazio" data-en="Space">Spazio</option>
+              </optgroup>
+              <optgroup data-it="Altri settori critici (Allegato II)" data-en="Other critical sectors (Annex II)" label="Altri settori critici (Allegato II)">
+                <option value="lo" data-it="Servizi postali e di corriere" data-en="Postal and courier services">Servizi postali e di corriere</option>
+                <option value="lo" data-it="Gestione dei rifiuti" data-en="Waste management">Gestione dei rifiuti</option>
+                <option value="lo" data-it="Produzione di sostanze chimiche" data-en="Manufacture of chemicals">Produzione di sostanze chimiche</option>
+                <option value="lo" data-it="Produzione / distribuzione alimentare" data-en="Food production / distribution">Produzione / distribuzione alimentare</option>
+                <option value="lo" data-it="Fabbricazione (dispositivi medici, elettronica, macchinari, autoveicoli)" data-en="Manufacturing (medical devices, electronics, machinery, vehicles)">Fabbricazione (dispositivi medici, elettronica, macchinari, autoveicoli)</option>
+                <option value="lo" data-it="Fornitori di servizi digitali (marketplace, motori di ricerca, social)" data-en="Digital service providers (marketplaces, search engines, social)">Fornitori di servizi digitali (marketplace, motori di ricerca, social)</option>
+                <option value="lo" data-it="Ricerca" data-en="Research">Ricerca</option>
+              </optgroup>
+              <option value="none" data-it="Altro / Non elencato" data-en="Other / Not listed">Altro / Non elencato</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="size" data-i18n="lbl_size">Dimensione dell'azienda</label>
+            <select id="size">
+              <option value="" data-it="Seleziona…" data-en="Select…">Seleziona…</option>
+              <option value="micro" data-it="Microimpresa (&lt; 10 dipendenti, &lt; 2 mln €)" data-en="Micro (&lt; 10 employees, &lt; €2M)">Microimpresa (&lt; 10 dipendenti, &lt; 2 mln €)</option>
+              <option value="small" data-it="Piccola (10–49 dipendenti, &lt; 10 mln €)" data-en="Small (10–49 employees, &lt; €10M)">Piccola (10–49 dipendenti, &lt; 10 mln €)</option>
+              <option value="medium" data-it="Media (50–249 dipendenti, &lt; 50 mln €)" data-en="Medium (50–249 employees, &lt; €50M)">Media (50–249 dipendenti, &lt; 50 mln €)</option>
+              <option value="large" data-it="Grande (≥ 250 dipendenti oppure &gt; 50 mln €)" data-en="Large (≥ 250 employees or &gt; €50M)">Grande (≥ 250 dipendenti oppure &gt; 50 mln €)</option>
+            </select>
+          </div>
+        </div>
+        <div class="verdict" id="verdict">
+          <div class="vico" aria-hidden="true">?</div>
+          <div>
+            <div class="vtitle">In attesa dei dati</div>
+            <div class="vdesc">Seleziona settore e dimensione per una valutazione indicativa dell'ambito di applicazione.</div>
+          </div>
+        </div>
+      </div>
+    <div class="tabnav">
+      <span></span>
+      <button class="cta nav-adv" data-goto="1" data-i18n="next" style="width:auto;margin:0">Avanti →</button>
+    </div>
+
+    <section class="about">
+      <div class="about-inner">
+        <div class="about-avatar" aria-hidden="true">LR</div>
+        <div class="about-body">
+          <div class="about-eyebrow" data-i18n="about_eyebrow">Chi c'è dietro NISafe</div>
+          <div class="about-name">Lorenzo Russo <span class="about-role" data-i18n="about_role">Founder</span></div>
+          <p class="about-blurb" data-i18n="about_blurb">Cybersecurity Engineer e penetration tester. NISafe nasce dalla parte offensiva: non solo checklist, ma la prova che le tue difese reggono davvero. Vuoi una demo per la tua azienda? Scrivimi.</p>
+          <div class="about-highlights">
+            <span class="hl-badge" data-i18n="hl1">🚀 Riconoscimento dalla NASA</span>
+            <span class="hl-badge" data-i18n="hl2">🏅 2 CVE assegnate</span>
+          </div>
+          <div class="about-links">
+            <a class="about-btn" href="mailto:lorenzorusso2911@gmail.com">✉&nbsp; Email</a>
+            <a class="about-btn" href="https://www.linkedin.com/in/lorenzo-russo00/" target="_blank" rel="noopener">in&nbsp; LinkedIn</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="tabpanel" data-panel="1" hidden>
+    <div class="step-head"><h2 data-i18n="step2">Le tue misure di sicurezza</h2><span class="hint" data-i18n="hint2">art. 21 · 10 aree</span></div>
+    <div class="assess-layout">
+      <div class="measures" id="measures"></div>
+      <aside>
+        <div class="card panel">
+          <h3 data-i18n="gauge_h3">Livello di conformità</h3>
+          <div class="gauge" id="gauge"><div class="num"><span id="gaugeNum">—</span><sup>%</sup></div></div>
+          <div class="gauge-cap" id="gaugeCap" data-i18n="gauge_cap0">Rispondi per iniziare</div>
+          <div class="prog" id="prog">Completate <b>0</b> / 0 domande</div>
+          <div class="bars" id="bars"></div>
+          <div class="legend">
+            <span><span class="dot" style="background:var(--good)"></span><span data-i18n="leg_si">Sì</span></span>
+            <span><span class="dot" style="background:var(--warn)"></span><span data-i18n="leg_parz">Parziale</span></span>
+            <span><span class="dot" style="background:var(--crit)"></span><span data-i18n="leg_no">No</span></span>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="tabnav">
+      <button class="ghost-btn nav-adv" data-goto="0" data-i18n="back">← Indietro</button>
+      <button class="cta" id="genBtn" data-i18n="genbtn" disabled style="width:auto;margin:0">Genera il gap report →</button>
+    </div>
+  </section>
+
+  <section class="tabpanel" data-panel="2" hidden>
+    <div class="empty-hint" id="reportEmpty" data-i18n="report_empty">Completa l'autovalutazione nella scheda precedente e genera il gap report.</div>
+    <section class="card report" id="report" hidden>
+        <div class="report-head">
+          <div>
+            <h2 data-i18n="report_h2">Gap report NIS2</h2>
+            <p id="reportDate"></p>
+          </div>
+        </div>
+        <div class="stat-row" id="stats"></div>
+        <div class="road" id="road"></div>
+        <div class="report-actions">
+          <button class="cta" style="width:auto" id="docGenBtn" data-i18n="docgen">Genera i documenti di conformità →</button>
+          <button class="ghost-btn" onclick="window.print()" data-i18n="print">Esporta / Stampa report</button>
+        </div>
+      </section>
+
+      <div class="step-head" id="docStep" hidden><h2 data-i18n="step3">I tuoi documenti di conformità</h2><span class="hint" data-i18n="hint3">generati automaticamente</span></div>
+      <section class="card docs" id="docs" hidden>
+        <p class="doc-intro"><span class="ai-tag">AI</span>
+          <span data-i18n-html="docintro">Documenti precompilati sui dati e sulle risposte di <b id="docCompany">la tua azienda</b>. <b>Puoi modificarli direttamente qui sotto</b>, poi copiarli o scaricarli. Nel prodotto finale il testo viene adattato dall'AI caso per caso. Da revisionare e far approvare dalla direzione prima dell'adozione.</span>
+        </p>
+        <div class="doc-list" id="docList"></div>
+      </section>
+    <div class="tabnav">
+      <button class="ghost-btn nav-adv" data-goto="1" data-i18n="back">← Indietro</button>
+      <button class="cta nav-adv" data-goto="3" data-i18n="next_scan" style="width:auto;margin:0">Vai allo scanner →</button>
+    </div>
+  </section>
+
+  <section class="tabpanel" data-panel="3" hidden>
+    <div class="step-head"><h2 data-i18n="step4">Verifica tecnica esterna</h2><span class="hint" data-i18n="hint4">scanner · lead magnet</span></div>
+    <section class="card scan">
+      <div class="scan-intro">
+        <span class="demo-tag">Demo</span>
+        <p data-i18n-html="scan_intro">Inserisci un dominio: lo scanner analizza la <b>superficie esterna</b> (sicurezza email, TLS, header HTTP, porte esposte) e mostra le vulnerabilità visibili da fuori. È la controprova tecnica alle risposte dichiarate nell'autovalutazione — e il gancio gratuito da offrire ai potenziali clienti.</p>
+      </div>
+      <div class="scan-form">
+        <input type="text" id="domain" placeholder="es. azienda.it" data-i18n-ph="ph_domain" autocomplete="off" spellcheck="false">
+        <button class="cta" id="scanBtn" style="width:auto;margin:0" data-i18n="scan_btn">Analizza superficie →</button>
+      </div>
+      <div id="scanResult" hidden></div>
+    </section>
+    <div class="tabnav">
+      <button class="ghost-btn nav-adv" data-goto="2" data-i18n="back">← Indietro</button>
+      <span></span>
+    </div>
+  </section>
+
+  <p class="disclaimer" data-i18n-html="disclaimer">
+    <b>Nota.</b> Questo strumento fornisce una valutazione <b>indicativa e automatizzata</b> a scopo di orientamento e non costituisce consulenza legale né garanzia di conformità. L'ambito di applicazione definitivo e la classificazione dell'entità (essenziale / importante) dipendono dal recepimento nazionale della direttiva e vanno verificati con l'autorità competente (in Italia, ACN). La responsabilità della conformità resta in capo all'organizzazione e al suo organo di gestione.
+  </p>
+</div>
+
+<script>
+const MEASURES = [
+  {l:"a",w:3,t:"Analisi dei rischi e politiche di sicurezza",q:[
+    {quick:true,ref:"art. 21(2)(a)",t:"Esiste un'analisi dei rischi cyber documentata e aggiornata negli ultimi 12 mesi?",a:"Effettua e documenta un'analisi dei rischi cyber, aggiornandola almeno una volta l'anno."},
+    {quick:true,ref:"art. 21(2)(a) · art. 20",t:"Avete una politica di sicurezza delle informazioni approvata dalla direzione?",a:"Redigi una politica di sicurezza delle informazioni e falla approvare formalmente dall'organo di gestione."},
+    {quick:false,ref:"art. 21(2)(a) · Reg. UE 2024/2690",t:"È definita una metodologia per identificare, analizzare e trattare i rischi, con criteri di accettazione?",a:"Adotta una metodologia strutturata di risk assessment con criteri di accettazione del rischio."},
+    {quick:false,ref:"art. 20",t:"Ruoli e responsabilità in materia di sicurezza sono formalmente assegnati?",a:"Assegna e documenta ruoli e responsabilità di sicurezza (es. referente/responsabile)."},
+    {quick:false,ref:"art. 20(1)",t:"L'organo di gestione riesamina periodicamente rischi e misure adottate?",a:"Istituisci un riesame periodico della sicurezza da parte della direzione, verbalizzato."},
+  ]},
+  {l:"b",w:3,t:"Gestione degli incidenti",q:[
+    {quick:true,ref:"art. 21(2)(b)",t:"Esiste una procedura scritta per rilevare, classificare e gestire gli incidenti?",a:"Definisci una procedura di incident handling con ruoli, gravità e passi operativi."},
+    {quick:true,ref:"art. 23(3)(4)",t:"Sapete come e a chi notificare un incidente (CSIRT) entro le 24 e 72 ore previste?",a:"Predisponi il processo di notifica al CSIRT con i modelli e i tempi di legge (early warning 24h, notifica 72h)."},
+    {quick:true,ref:"art. 21(2)(b)",t:"Registrate gli incidenti in un log tracciabile?",a:"Attiva un registro degli incidenti con data, impatto e azioni intraprese."},
+    {quick:false,ref:"art. 21(2)(b) · Reg. UE 2024/2690",t:"Sono definiti ruoli di risposta e reperibilità per gli incidenti?",a:"Assegna un team/referente di risposta con contatti e reperibilità documentati."},
+    {quick:false,ref:"art. 23(3) · Reg. UE 2024/2690",t:"Avete criteri chiari per stabilire quando un incidente è 'significativo' (e quindi da notificare)?",a:"Definisci soglie e criteri di significatività dell'incidente secondo il regolamento di esecuzione."},
+    {quick:false,ref:"art. 23(2)",t:"Sapreste informare i destinatari dei vostri servizi in caso di incidente rilevante?",a:"Predisponi un modello di comunicazione ai clienti/utenti per gli incidenti che li riguardano."},
+  ]},
+  {l:"c",w:3,t:"Continuità operativa e backup",q:[
+    {quick:true,ref:"art. 21(2)(c)",t:"Eseguite backup regolari dei dati e sistemi critici?",a:"Imposta backup automatici e regolari dei dati critici, con copie offline/immutabili."},
+    {quick:true,ref:"art. 21(2)(c)",t:"I backup vengono testati con un ripristino reale almeno una volta l'anno?",a:"Pianifica test di ripristino periodici per verificare che i backup siano davvero utilizzabili."},
+    {quick:true,ref:"art. 21(2)(c)",t:"Esiste un piano di continuità operativa / disaster recovery documentato?",a:"Redigi un piano di business continuity e disaster recovery con RTO/RPO definiti."},
+    {quick:false,ref:"art. 21(2)(c) · Reg. UE 2024/2690",t:"Sono definiti gli obiettivi di ripristino (RTO/RPO) per i processi critici?",a:"Definisci RTO e RPO per ciascun processo critico e allineali al piano di continuità."},
+    {quick:false,ref:"art. 21(2)(c)",t:"Almeno una copia di backup è protetta da modifiche/cancellazione (offline o immutabile)?",a:"Predisponi copie di backup offline o immutabili come difesa dal ransomware."},
+    {quick:false,ref:"art. 21(2)(c)",t:"Esiste un piano di gestione delle crisi con ruoli e catena di comando?",a:"Formalizza un piano di gestione delle crisi con ruoli, decisori e procedure di escalation."},
+  ]},
+  {l:"d",w:2,t:"Sicurezza della catena di fornitura",q:[
+    {quick:true,ref:"art. 21(2)(d)",t:"Valutate la sicurezza dei fornitori ICT critici prima di ingaggiarli?",a:"Introduci una valutazione di sicurezza (questionario) per i fornitori critici."},
+    {quick:true,ref:"art. 21(2)(d)",t:"I contratti con i fornitori includono requisiti di sicurezza e di notifica incidenti?",a:"Aggiungi clausole di sicurezza e obblighi di notifica nei contratti con i fornitori."},
+    {quick:false,ref:"art. 21(2)(d)",t:"Mantenete un elenco dei fornitori critici e dei servizi che erogano?",a:"Crea un registro dei fornitori critici con servizi forniti e dati a cui accedono."},
+    {quick:false,ref:"art. 21(3)",t:"Tenete conto delle vulnerabilità specifiche di ciascun fornitore diretto?",a:"Valuta periodicamente le vulnerabilità e la postura di sicurezza dei singoli fornitori."},
+  ]},
+  {l:"e",w:2,t:"Sviluppo sicuro e gestione delle vulnerabilità",q:[
+    {quick:true,ref:"art. 21(2)(e)",t:"Applicate le patch di sicurezza entro tempi definiti?",a:"Definisci un processo di patch management con tempistiche in base alla gravità."},
+    {quick:true,ref:"art. 21(2)(e)",t:"Esiste un canale per ricevere e gestire segnalazioni di vulnerabilità?",a:"Predisponi un processo di vulnerability handling e disclosure (es. security.txt, casella dedicata)."},
+    {quick:false,ref:"art. 21(2)(e)",t:"I requisiti di sicurezza sono considerati nell'acquisto di nuovi sistemi/servizi?",a:"Inserisci requisiti di sicurezza nei criteri di acquisizione di sistemi e servizi ICT."},
+    {quick:false,ref:"art. 21(2)(e) · Reg. UE 2024/2690",t:"I sistemi sono configurati in modo sicuro (hardening, rimozione servizi non necessari)?",a:"Applica configurazioni sicure (hardening) e disabilita servizi e account non necessari."},
+  ]},
+  {l:"f",w:2,t:"Verifica dell'efficacia delle misure",q:[
+    {quick:true,ref:"art. 21(2)(f)",t:"Testate periodicamente l'efficacia delle difese (vulnerability scan, penetration test)?",a:"Programma test tecnici periodici (scan e penetration test) per verificare l'efficacia reale delle misure."},
+    {quick:true,ref:"art. 21(2)(f)",t:"I risultati dei test vengono usati per correggere le vulnerabilità trovate?",a:"Istituisci un ciclo di remediation che chiude le vulnerabilità emerse dai test."},
+    {quick:false,ref:"art. 21(2)(f)",t:"Effettuate audit o riesami periodici dell'efficacia complessiva delle misure?",a:"Pianifica audit/riesami periodici dell'efficacia del sistema di gestione della sicurezza."},
+  ]},
+  {l:"g",w:3,t:"Igiene informatica e formazione",q:[
+    {quick:true,ref:"art. 21(2)(g)",t:"I dipendenti ricevono formazione periodica sulla sicurezza informatica?",a:"Attiva un programma di formazione e awareness ricorrente per tutto il personale."},
+    {quick:true,ref:"art. 21(2)(g)",t:"Effettuate simulazioni di phishing o campagne di sensibilizzazione?",a:"Avvia campagne periodiche di simulazione phishing per misurare e migliorare la consapevolezza."},
+    {quick:false,ref:"art. 20(2)",t:"L'organo di gestione segue una formazione specifica sui rischi cyber?",a:"Prevedi una formazione dedicata per la direzione, come richiesto dall'art. 20."},
+    {quick:false,ref:"art. 21(2)(g)",t:"Sono adottate pratiche di igiene di base (aggiornamenti, antivirus, gestione account)?",a:"Standardizza le pratiche di igiene informatica di base su tutti i dispositivi aziendali."},
+  ]},
+  {l:"h",w:2,t:"Crittografia e cifratura",q:[
+    {quick:true,ref:"art. 21(2)(h)",t:"I dati sensibili sono cifrati a riposo (dischi, database, backup)?",a:"Abilita la cifratura a riposo su dispositivi, database e backup contenenti dati sensibili."},
+    {quick:true,ref:"art. 21(2)(h)",t:"Le comunicazioni sono protette con TLS/VPN?",a:"Imponi TLS per i servizi esposti e VPN per gli accessi remoti."},
+    {quick:false,ref:"art. 21(2)(h) · Reg. UE 2024/2690",t:"Esiste una politica su crittografia e gestione delle chiavi?",a:"Definisci una politica di crittografia con algoritmi ammessi e gestione sicura delle chiavi."},
+  ]},
+  {l:"i",w:3,t:"Controllo accessi, asset e risorse umane",q:[
+    {quick:true,ref:"art. 21(2)(i)",t:"Mantenete un inventario aggiornato di dispositivi, sistemi e servizi?",a:"Crea e mantieni un inventario degli asset IT (hardware, software, servizi cloud)."},
+    {quick:true,ref:"art. 21(2)(i)",t:"Applicate il principio del privilegio minimo agli accessi?",a:"Rivedi i permessi applicando il privilegio minimo e separando i ruoli amministrativi."},
+    {quick:true,ref:"art. 21(2)(i)",t:"Gli accessi vengono revocati tempestivamente quando una persona lascia l'azienda?",a:"Definisci una procedura di offboarding che revochi accessi e credenziali immediatamente."},
+    {quick:false,ref:"art. 21(2)(i) · Reg. UE 2024/2690",t:"Gli account amministrativi/privilegiati sono gestiti e monitorati separatamente?",a:"Separa e monitora gli account privilegiati, con credenziali dedicate e tracciamento."},
+    {quick:false,ref:"art. 21(2)(i)",t:"Sono previste clausole di riservatezza e verifiche per il personale (sicurezza HR)?",a:"Inserisci obblighi di riservatezza e, ove appropriato, verifiche del personale nei processi HR."},
+  ]},
+  {l:"j",w:3,t:"Autenticazione a più fattori e comunicazioni",q:[
+    {quick:true,ref:"art. 21(2)(j)",t:"L'autenticazione a più fattori (MFA) è attiva su email e sistemi critici?",a:"Attiva l'MFA su email, VPN, accessi amministrativi e tutti i sistemi critici."},
+    {quick:true,ref:"art. 21(2)(j)",t:"Esiste un canale di comunicazione di emergenza in caso di crisi (fuori dai sistemi ordinari)?",a:"Predisponi un canale di comunicazione di emergenza indipendente dai sistemi aziendali principali."},
+    {quick:false,ref:"art. 21(2)(j)",t:"Le comunicazioni vocali, video e di testo interne sono protette dove necessario?",a:"Adotta strumenti di comunicazione cifrati per le comunicazioni sensibili."},
+  ]},
+];
+
+// ---- i18n ----
+let lang = 'it';
+let activeTab = 0;
+const EN = {
+  measures:["Risk analysis and security policies","Incident management","Business continuity and backup",
+    "Supply chain security","Secure development and vulnerability management","Effectiveness of security measures",
+    "Cyber hygiene and training","Cryptography and encryption","Access control, assets and human resources",
+    "Multi-factor authentication and communications"],
+  q:{
+    "0_0":{t:"Is there a documented cyber risk analysis, updated within the last 12 months?",a:"Carry out and document a cyber risk analysis, updating it at least once a year."},
+    "0_1":{t:"Do you have an information security policy approved by top management?",a:"Draft an information security policy and have it formally approved by the management body."},
+    "0_2":{t:"Is there a defined methodology to identify, analyse and treat risks, with acceptance criteria?",a:"Adopt a structured risk assessment methodology with risk acceptance criteria."},
+    "0_3":{t:"Are security roles and responsibilities formally assigned?",a:"Assign and document security roles and responsibilities (e.g. a security officer)."},
+    "0_4":{t:"Does the management body periodically review risks and the measures in place?",a:"Establish a periodic management review of security, recorded in minutes."},
+    "1_0":{t:"Is there a written procedure to detect, classify and handle incidents?",a:"Define an incident handling procedure with roles, severity and operational steps."},
+    "1_1":{t:"Do you know how and to whom to notify an incident (CSIRT) within the required 24 and 72 hours?",a:"Set up the CSIRT notification process with templates and legal deadlines (24h early warning, 72h notification)."},
+    "1_2":{t:"Do you record incidents in a traceable log?",a:"Enable an incident register with date, impact and actions taken."},
+    "1_3":{t:"Are response roles and on-call duties defined for incidents?",a:"Assign a response team/officer with documented contacts and on-call coverage."},
+    "1_4":{t:"Do you have clear criteria to decide when an incident is 'significant' (and therefore notifiable)?",a:"Define thresholds and significance criteria for incidents per the implementing regulation."},
+    "1_5":{t:"Would you be able to inform the recipients of your services in case of a relevant incident?",a:"Prepare a customer/user communication template for incidents that affect them."},
+    "2_0":{t:"Do you run regular backups of critical data and systems?",a:"Set up automatic, regular backups of critical data, with offline/immutable copies."},
+    "2_1":{t:"Are backups tested with a real restore at least once a year?",a:"Schedule periodic restore tests to verify backups are actually usable."},
+    "2_2":{t:"Is there a documented business continuity / disaster recovery plan?",a:"Draft a business continuity and disaster recovery plan with defined RTO/RPO."},
+    "2_3":{t:"Are recovery objectives (RTO/RPO) defined for critical processes?",a:"Define RTO and RPO for each critical process and align them with the continuity plan."},
+    "2_4":{t:"Is at least one backup copy protected from modification/deletion (offline or immutable)?",a:"Keep offline or immutable backup copies as a defence against ransomware."},
+    "2_5":{t:"Is there a crisis management plan with roles and chain of command?",a:"Formalise a crisis management plan with roles, decision-makers and escalation."},
+    "3_0":{t:"Do you assess the security of critical ICT suppliers before engaging them?",a:"Introduce a security assessment (questionnaire) for critical suppliers."},
+    "3_1":{t:"Do supplier contracts include security requirements and incident-notification obligations?",a:"Add security clauses and notification obligations to supplier contracts."},
+    "3_2":{t:"Do you keep a list of critical suppliers and the services they provide?",a:"Create a register of critical suppliers with services provided and data accessed."},
+    "3_3":{t:"Do you take into account the specific vulnerabilities of each direct supplier?",a:"Periodically assess the vulnerabilities and security posture of individual suppliers."},
+    "4_0":{t:"Do you apply security patches within defined timeframes?",a:"Define a patch management process with timeframes based on severity."},
+    "4_1":{t:"Is there a channel to receive and handle vulnerability reports?",a:"Set up a vulnerability handling and disclosure process (e.g. security.txt, dedicated inbox)."},
+    "4_2":{t:"Are security requirements considered when purchasing new systems/services?",a:"Include security requirements in the acquisition criteria for ICT systems and services."},
+    "4_3":{t:"Are systems securely configured (hardening, removal of unnecessary services)?",a:"Apply secure configurations (hardening) and disable unnecessary services and accounts."},
+    "5_0":{t:"Do you periodically test the effectiveness of your defences (vulnerability scan, penetration test)?",a:"Schedule periodic technical tests (scans and penetration tests) to verify real effectiveness."},
+    "5_1":{t:"Are test results used to fix the vulnerabilities found?",a:"Establish a remediation cycle that closes vulnerabilities found in tests."},
+    "5_2":{t:"Do you carry out periodic audits or reviews of the overall effectiveness of measures?",a:"Plan periodic audits/reviews of the effectiveness of the security management system."},
+    "6_0":{t:"Do employees receive periodic information security training?",a:"Set up a recurring training and awareness programme for all staff."},
+    "6_1":{t:"Do you run phishing simulations or awareness campaigns?",a:"Launch periodic phishing simulation campaigns to measure and improve awareness."},
+    "6_2":{t:"Does the management body follow specific training on cyber risks?",a:"Provide dedicated training for management, as required by Article 20."},
+    "6_3":{t:"Are basic hygiene practices in place (updates, antivirus, account management)?",a:"Standardise basic cyber-hygiene practices across all company devices."},
+    "7_0":{t:"Is sensitive data encrypted at rest (disks, databases, backups)?",a:"Enable encryption at rest on devices, databases and backups holding sensitive data."},
+    "7_1":{t:"Are communications protected with TLS/VPN?",a:"Enforce TLS for exposed services and VPN for remote access."},
+    "7_2":{t:"Is there a policy on cryptography and key management?",a:"Define a cryptography policy with allowed algorithms and secure key management."},
+    "8_0":{t:"Do you keep an up-to-date inventory of devices, systems and services?",a:"Create and maintain an IT asset inventory (hardware, software, cloud services)."},
+    "8_1":{t:"Do you apply the principle of least privilege to access?",a:"Review permissions applying least privilege and separating administrative roles."},
+    "8_2":{t:"Is access revoked promptly when a person leaves the company?",a:"Define an offboarding procedure that revokes access and credentials immediately."},
+    "8_3":{t:"Are privileged/administrative accounts managed and monitored separately?",a:"Separate and monitor privileged accounts, with dedicated credentials and logging."},
+    "8_4":{t:"Are confidentiality clauses and personnel checks in place (HR security)?",a:"Include confidentiality obligations and, where appropriate, personnel checks in HR processes."},
+    "9_0":{t:"Is multi-factor authentication (MFA) enabled on email and critical systems?",a:"Enable MFA on email, VPN, administrative access and all critical systems."},
+    "9_1":{t:"Is there an emergency communication channel in case of a crisis (outside ordinary systems)?",a:"Set up an emergency communication channel independent of the main company systems."},
+    "9_2":{t:"Are internal voice, video and text communications protected where necessary?",a:"Adopt encrypted communication tools for sensitive communications."},
+  }
+};
+const T = {
+  it:{ brand_tag:"Conformità NIS2 in autonomia", reset:"Ricomincia",
+    eyebrow:"Autovalutazione · Direttiva UE 2022/2555",
+    h1:"Metti in regola la tua azienda con la <span class=\"hl\">NIS2</span>. Da solo, in 5 minuti.",
+    intro_p:"Rispondi alle domande sulle misure di sicurezza previste dall'art. 21.<br>NISafe calcola il tuo livello di conformità e genera una <strong>roadmap prioritizzata</strong> e i <strong>documenti</strong> pronti. Nessuna consulenza, nessun costo nascosto.",
+    chip1:"80% del percorso in autonomia", chip2:"Senza consulenze costose", chip3:"Report e documenti in 5 minuti",
+    step1:"La NIS2 si applica a te?", lbl_company:"Nome dell'azienda", ph_company:"Es. Rossi Manifattura S.r.l.",
+    lbl_sector:"Settore di attività", lbl_size:"Dimensione dell'azienda",
+    step2:"Le tue misure di sicurezza", hint2:"art. 21 · 10 aree",
+    ms_quick:"Valutazione rapida", ms_full:"Checklist completa",
+    ms_hint_quick:"Le domande essenziali · ~5 minuti", ms_hint_full:"Tutti i requisiti NIS2, con riferimento normativo",
+    gauge_h3:"Livello di conformità", gauge_cap0:"Rispondi per iniziare",
+    cap_crit:"Livello critico — molti gap", cap_warn:"Livello parziale — margini di miglioramento", cap_good:"Buon livello di maturità",
+    prog:"Completate <b>{a}</b> / {t} domande", genbtn:"Genera il gap report →",
+    tab1:"Ambito", tab2:"Autovalutazione", tab3:"Report e documenti", tab4:"Scanner",
+    next:"Avanti →", back:"← Indietro", next_scan:"Vai allo scanner →",
+    report_empty:"Completa l'autovalutazione nella scheda precedente e genera il gap report.",
+    about_eyebrow:"Chi c'è dietro NISafe", about_role:"Founder",
+    about_blurb:"Cybersecurity Engineer e penetration tester. NISafe nasce dalla parte offensiva: non solo checklist, ma la prova che le tue difese reggono davvero. Vuoi una demo per la tua azienda? Scrivimi.",
+    hl1:"🚀 Riconoscimento dalla NASA", hl2:"🏅 2 CVE assegnate",
+    opt_si:"Sì", opt_parz:"Parziale", opt_no:"No", opt_na:"N.A.",
+    leg_si:"Sì", leg_parz:"Parziale", leg_no:"No",
+    report_h2:"Gap report NIS2", docgen:"Genera i documenti di conformità →", print:"Esporta / Stampa report",
+    st_comp:"Conformità stimata", st_prio:"Interventi prioritari", st_med:"A media priorità", st_gaps:"Gap totali rilevati",
+    road_h:"Roadmap prioritizzata", road_sub:"Interventi ordinati per priorità, calcolata su criticità dell'area × ampiezza del gap.",
+    allgood:"✓ Nessun gap rilevato sulle risposte fornite. Ottimo lavoro — mantieni le evidenze aggiornate.",
+    rep_date:"Generato il {date} · basato su {a}/{t} risposte", mode_quick:"valutazione rapida", mode_full:"checklist completa",
+    sev_critica:"critica", sev_alta:"alta", sev_media:"media", sev_bassa:"bassa",
+    step3:"I tuoi documenti di conformità", hint3:"generati automaticamente",
+    docintro:"Documenti precompilati sui dati e sulle risposte di <b id=\"docCompany\">la tua azienda</b>. <b>Puoi modificarli direttamente qui sotto</b>, poi copiarli o scaricarli. Nel prodotto finale il testo viene adattato dall'AI caso per caso. Da revisionare e far approvare dalla direzione prima dell'adozione.",
+    copy:"Copia", copied:"Copiato ✓", download:"Scarica",
+    step4:"Verifica tecnica esterna", hint4:"scanner · lead magnet",
+    scan_intro:"Inserisci un dominio: NISafe analizza la <b>superficie esterna</b> pubblicamente visibile (sicurezza email, TLS, header HTTP, porte esposte) e ti mostra le vulnerabilità che un attaccante vedrebbe da fuori. <b>Questa è una dimostrazione</b>: i risultati sono generati a scopo illustrativo dal dominio inserito; nella versione completa i controlli vengono eseguiti realmente sull'infrastruttura, senza inviare dati sensibili a terzi.",
+    scan_btn:"Analizza superficie →", ph_domain:"es. azienda.it",
+    sc_score:"Punteggio esposizione", sc_crit:"Critici", sc_warn:"Da migliorare", sc_ok:"Conformi",
+    fix_title:"Come risolvere", fix_do:"Fai", fix_dont:"Evita",
+    sc_all:"Mostra tutti", sc_none:"Nessun elemento in questa categoria.",
+    disclaimer:"<b>Nota.</b> Questo strumento fornisce una valutazione <b>indicativa e automatizzata</b> a scopo di orientamento e non costituisce consulenza legale né garanzia di conformità. L'ambito di applicazione definitivo e la classificazione dell'entità (essenziale / importante) dipendono dal recepimento nazionale della direttiva e vanno verificati con l'autorità competente (in Italia, ACN). La responsabilità della conformità resta in capo all'organizzazione e al suo organo di gestione.",
+    v_wait_t:"In attesa dei dati", v_wait_d:"Seleziona settore e dimensione per una valutazione indicativa dell'ambito di applicazione.",
+    v_none_d:"Il settore indicato non rientra tra quelli elencati negli Allegati I e II. Verifica comunque eventuali obblighi settoriali specifici.",
+    v_out_t:"Probabilmente fuori ambito", v_out_d:"Sotto la soglia dimensionale la NIS2 di norma non si applica. Attenzione: alcune entità (es. fornitori DNS/TLD, telecomunicazioni, servizi fiduciari, PA) rientrano a prescindere dalla dimensione.",
+    v_none_t:"Probabilmente fuori ambito",
+    v_ess_t:"Probabile entità essenziale", v_ess_d:"Grande impresa in un settore ad alta criticità: soggetta agli obblighi NIS2 con il regime di vigilanza più stringente. Registrazione presso l'autorità e piena attuazione dell'art. 21.",
+    v_imp_t:"Probabile entità importante", v_imp_d:"Rientri con ogni probabilità tra le entità importanti: obblighi dell'art. 21 e notifica degli incidenti, con vigilanza ex-post. Procedi con l'autovalutazione qui sotto.",
+  },
+  en:{ brand_tag:"NIS2 compliance, on your own", reset:"Start over",
+    eyebrow:"Self-assessment · EU Directive 2022/2555",
+    h1:"Get your company <span class=\"hl\">NIS2</span>-ready. On your own, in 5 minutes.",
+    intro_p:"Answer the questions on the security measures required by Article 21.<br>NISafe calculates your compliance level and generates a <strong>prioritised roadmap</strong> and ready-to-use <strong>documents</strong>. No consultants, no hidden costs.",
+    chip1:"80% of the journey on your own", chip2:"No expensive consultants", chip3:"Report and documents in 5 minutes",
+    step1:"Does NIS2 apply to you?", lbl_company:"Company name", ph_company:"e.g. Rossi Manufacturing Ltd",
+    lbl_sector:"Sector of activity", lbl_size:"Company size",
+    step2:"Your security measures", hint2:"Art. 21 · 10 areas",
+    ms_quick:"Quick assessment", ms_full:"Full checklist",
+    ms_hint_quick:"The essential questions · ~5 minutes", ms_hint_full:"All NIS2 requirements, with legal references",
+    gauge_h3:"Compliance level", gauge_cap0:"Answer to begin",
+    cap_crit:"Critical level — many gaps", cap_warn:"Partial level — room to improve", cap_good:"Good maturity level",
+    prog:"Completed <b>{a}</b> / {t} questions", genbtn:"Generate the gap report →",
+    tab1:"Scope", tab2:"Self-assessment", tab3:"Report & documents", tab4:"Scanner",
+    next:"Next →", back:"← Back", next_scan:"Go to scanner →",
+    report_empty:"Complete the self-assessment in the previous tab and generate the gap report.",
+    about_eyebrow:"Who's behind NISafe", about_role:"Founder",
+    about_blurb:"Cybersecurity Engineer and penetration tester. NISafe comes from the offensive side: not just checklists, but proof that your defences really hold. Want a demo for your company? Get in touch.",
+    hl1:"🚀 Recognition from NASA", hl2:"🏅 2 assigned CVEs",
+    opt_si:"Yes", opt_parz:"Partial", opt_no:"No", opt_na:"N/A",
+    leg_si:"Yes", leg_parz:"Partial", leg_no:"No",
+    report_h2:"NIS2 gap report", docgen:"Generate compliance documents →", print:"Export / Print report",
+    st_comp:"Estimated compliance", st_prio:"Priority actions", st_med:"Medium priority", st_gaps:"Total gaps found",
+    road_h:"Prioritised roadmap", road_sub:"Actions ordered by priority, computed as area criticality × size of the gap.",
+    allgood:"✓ No gaps found on the answers provided. Great work — keep your evidence up to date.",
+    rep_date:"Generated on {date} · based on {a}/{t} answers", mode_quick:"quick assessment", mode_full:"full checklist",
+    sev_critica:"critical", sev_alta:"high", sev_media:"medium", sev_bassa:"low",
+    step3:"Your compliance documents", hint3:"generated automatically",
+    docintro:"Documents pre-filled with the data and answers of <b id=\"docCompany\">your company</b>. <b>You can edit them directly below</b>, then copy or download them. In the final product the text is tailored by AI case by case. To be reviewed and approved by management before adoption.",
+    copy:"Copy", copied:"Copied ✓", download:"Download",
+    step4:"External technical check", hint4:"scanner · lead magnet",
+    scan_intro:"Enter a domain: NISafe analyses the publicly <b>visible external surface</b> (email security, TLS, HTTP headers, exposed ports) and shows you the vulnerabilities an attacker would see from outside. <b>This is a demonstration</b>: results are generated for illustration from the domain entered; in the full version the checks run for real against the infrastructure, without sending sensitive data to third parties.",
+    scan_btn:"Scan surface →", ph_domain:"e.g. company.com",
+    sc_score:"Exposure score", sc_crit:"Critical", sc_warn:"To improve", sc_ok:"Compliant",
+    fix_title:"How to fix", fix_do:"Do", fix_dont:"Avoid",
+    sc_all:"Show all", sc_none:"No items in this category.",
+    disclaimer:"<b>Note.</b> This tool provides an <b>indicative, automated</b> assessment for orientation purposes and does not constitute legal advice or a guarantee of compliance. The definitive scope of application and the entity classification (essential / important) depend on the national transposition of the directive and must be verified with the competent authority (in Italy, ACN). Responsibility for compliance remains with the organisation and its management body.",
+    v_wait_t:"Waiting for data", v_wait_d:"Select sector and size for an indicative assessment of the scope of application.",
+    v_none_d:"The selected sector is not among those listed in Annexes I and II. Still check for any sector-specific obligations.",
+    v_out_t:"Probably out of scope", v_out_d:"Below the size threshold NIS2 generally does not apply. Note: some entities (e.g. DNS/TLD providers, telecoms, trust services, public administration) are in scope regardless of size.",
+    v_none_t:"Probably out of scope",
+    v_ess_t:"Likely essential entity", v_ess_d:"Large enterprise in a high-criticality sector: subject to NIS2 obligations under the strictest supervisory regime. Registration with the authority and full implementation of Article 21.",
+    v_imp_t:"Likely important entity", v_imp_d:"You most likely fall among important entities: Article 21 obligations and incident notification, with ex-post supervision. Proceed with the self-assessment below.",
+  }
+};
+function tr(k){ return (T[lang] && T[lang][k]!==undefined) ? T[lang][k] : (T.it[k]||k); }
+function mTitle(mi){ return lang==='en' ? EN.measures[mi] : MEASURES[mi].t; }
+function qText(mi,qi){ return lang==='en' ? EN.q[mi+'_'+qi].t : MEASURES[mi].q[qi].t; }
+function qAct(mi,qi){ return lang==='en' ? EN.q[mi+'_'+qi].a : MEASURES[mi].q[qi].a; }
+
+const VAL = {si:1, parz:0.5, no:0, na:null};
+const answers = {}; // key mi_qi -> value string
+let mode = 'quick';
+function isActive(mi,qi){ return mode==='full' || MEASURES[mi].q[qi].quick; }
+function activeTotal(){ let n=0; MEASURES.forEach((m,mi)=>m.q.forEach((q,qi)=>{ if(isActive(mi,qi)) n++; })); return n; }
+
+// ---- render measures ----
+const mWrap = document.getElementById('measures');
+function renderMeasures(){
+  mWrap.innerHTML = MEASURES.map((m,mi)=>{
+    let active=0;
+    const body = m.q.map((q,qi)=>{
+      if(!isActive(mi,qi)) return '';
+      active++;
+      return `
+        <div class="q">
+          <div class="q-text">${qText(mi,qi)} <span class="qref">${q.ref}</span></div>
+          <div class="opts">
+            ${[['si',tr('opt_si')],['parz',tr('opt_parz')],['no',tr('opt_no')],['na',tr('opt_na')]].map(([v,lab])=>`
+              <label class="opt" data-v="${v}">
+                <input type="radio" name="q_${mi}_${qi}" value="${v}" ${answers['q_'+mi+'_'+qi]===v?'checked':''}>
+                <span>${lab}</span>
+              </label>`).join('')}
+          </div>
+        </div>`;
+    }).join('');
+    return `<div class="card measure">
+      <div class="m-head">
+        <span class="m-letter">${m.l}</span>
+        <span class="m-title">${mTitle(mi)}</span>
+        <span class="m-mini" id="mini-${mi}">0/${active}</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="m-body">${body}</div>
+    </div>`;
+  }).join('');
+  mWrap.querySelector('.measure').classList.add('open');
+}
+renderMeasures();
+
+// accordion + answers (delegated, survive re-render)
+mWrap.addEventListener('click',e=>{
+  const h=e.target.closest('.m-head'); if(h) h.parentElement.classList.toggle('open');
+});
+mWrap.addEventListener('change',e=>{
+  if(e.target.name && e.target.name.startsWith('q_')){
+    answers[e.target.name]=e.target.value;
+    recompute();
+    saveState();
+  }
+});
+
+// ---- scoring ----
+function measureScore(mi){
+  const m=MEASURES[mi]; let sum=0,cnt=0;
+  m.q.forEach((q,qi)=>{
+    if(!isActive(mi,qi)) return;
+    const v=answers[`q_${mi}_${qi}`];
+    if(v!==undefined && VAL[v]!==null){ sum+=VAL[v]; cnt++; }
+  });
+  return cnt? {pct:Math.round(sum/cnt*100), cnt} : {pct:null,cnt:0};
+}
+function answeredCount(){
+  let n=0; MEASURES.forEach((m,mi)=>m.q.forEach((q,qi)=>{
+    if(isActive(mi,qi) && answers['q_'+mi+'_'+qi]!==undefined) n++; }));
+  return n;
+}
+
+function recompute(){
+  let wSum=0,wTot=0;
+  const bars=[];
+  MEASURES.forEach((m,mi)=>{
+    const s=measureScore(mi);
+    let done=0,tot=0; m.q.forEach((q,qi)=>{ if(!isActive(mi,qi))return; tot++; if(answers[`q_${mi}_${qi}`]!==undefined) done++; });
+    const mini=document.getElementById('mini-'+mi); if(mini) mini.textContent=`${done}/${tot}`;
+    if(s.pct!==null){ wSum+=s.pct*m.w; wTot+=m.w; }
+    bars.push({l:m.l,pct:s.pct});
+  });
+  const overall = wTot? Math.round(wSum/wTot) : null;
+  renderGauge(overall);
+  renderBars(bars);
+
+  const ans=answeredCount(), tot=activeTotal();
+  const prog=document.getElementById('prog'); if(prog) prog.innerHTML=tr('prog').replace('{a}',ans).replace('{t}',tot);
+  document.getElementById('genBtn').disabled = ans<Math.ceil(tot*0.5);
+  if(typeof updateTabStates==='function') updateTabStates();
+}
+
+function bucket(p){ return p<45?'crit':(p<75?'warn':'good'); }
+function bucketColor(p){ return p<45?'var(--crit)':(p<75?'var(--warn)':'var(--good)'); }
+
+function renderGauge(p){
+  const g=document.getElementById('gauge');
+  const num=document.getElementById('gaugeNum');
+  const cap=document.getElementById('gaugeCap');
+  if(p===null){ g.style.setProperty('--p',0); num.textContent='—'; cap.textContent=tr('gauge_cap0'); return; }
+  g.style.setProperty('--p',p);
+  g.style.setProperty('--gc',bucketColor(p));
+  num.textContent=p;
+  cap.textContent = p<45?tr('cap_crit'):(p<75?tr('cap_warn'):tr('cap_good'));
+}
+function renderBars(bars){
+  const c=document.getElementById('bars');
+  c.innerHTML=bars.map(b=>`
+    <div class="bar-row">
+      <span class="bl">${b.l}</span>
+      <span class="track"><span class="fill" style="width:${b.pct??0}%;background:${b.pct===null?'var(--surface-3)':bucketColor(b.pct)}"></span></span>
+      <span class="bv">${b.pct===null?'—':b.pct}</span>
+    </div>`).join('');
+}
+
+// ---- report ----
+document.getElementById('genBtn').addEventListener('click',()=>{ genReport(false); showTab(2); });
+function sevOf(w,gap){ // gap: 1 (No) or .5 (Parziale)
+  const s=w*gap;
+  if(s>=2.5) return 'critica';
+  if(s>=1.5) return 'alta';
+  if(s>=0.75) return 'media';
+  return 'bassa';
+}
+const SEV_ORDER={critica:0,alta:1,media:2,bassa:3};
+function genReport(scroll){
+  const tasks=[];
+  MEASURES.forEach((m,mi)=>{
+    m.q.forEach((q,qi)=>{
+      if(!isActive(mi,qi)) return;
+      const v=answers[`q_${mi}_${qi}`];
+      if(v==='no'||v==='parz'){
+        const gap=v==='no'?1:0.5;
+        tasks.push({sev:sevOf(m.w,gap), area:`${m.l.toUpperCase()} · ${mTitle(mi)} · ${q.ref}`, action:qAct(mi,qi), s:m.w*gap});
+      }
+    });
+  });
+  tasks.sort((a,b)=> SEV_ORDER[a.sev]-SEV_ORDER[b.sev] || b.s-a.s);
+
+  // stats
+  const counts={critica:0,alta:0,media:0,bassa:0};
+  tasks.forEach(t=>counts[t.sev]++);
+  let wSum=0,wTot=0;
+  MEASURES.forEach((m,mi)=>{const s=measureScore(mi); if(s.pct!==null){wSum+=s.pct*m.w;wTot+=m.w;}});
+  const overall=wTot?Math.round(wSum/wTot):0;
+
+  document.getElementById('reportDate').textContent = tr('rep_date')
+    .replace('{date}', new Date().toLocaleDateString(lang==='en'?'en-GB':'it-IT',{day:'2-digit',month:'long',year:'numeric'}))
+    .replace('{a}', answeredCount()).replace('{t}', activeTotal())
+    .replace('{mode}', mode==='quick'?tr('mode_quick'):tr('mode_full'));
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat c-${bucket(overall)}"><div class="sv">${overall}%</div><div class="sl">${tr('st_comp')}</div></div>
+    <div class="stat c-crit"><div class="sv">${counts.critica+counts.alta}</div><div class="sl">${tr('st_prio')}</div></div>
+    <div class="stat c-warn"><div class="sv">${counts.media}</div><div class="sl">${tr('st_med')}</div></div>
+    <div class="stat c-good"><div class="sv">${tasks.length}</div><div class="sl">${tr('st_gaps')}</div></div>`;
+
+  const road=document.getElementById('road');
+  if(tasks.length===0){
+    road.innerHTML='<div class="allgood">'+tr('allgood')+'</div>';
+  } else {
+    road.innerHTML = `
+      <h3>${tr('road_h')}</h3>
+      <p class="sub">${tr('road_sub')}</p>
+      ${tasks.map(t=>`
+        <div class="task">
+          <span class="sev ${t.sev}">${tr('sev_'+t.sev)}</span>
+          <div class="tbody">
+            <div class="tmeta">${t.area}</div>
+            <b>${t.action}</b>
+          </div>
+        </div>`).join('')}`;
+  }
+  const rep=document.getElementById('report');
+  rep.hidden=false;
+  const empty=document.getElementById('reportEmpty'); if(empty) empty.hidden=true;
+  updateTabStates();
+  saveState();
+  if(scroll!==false) rep.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ---- applicability ----
+const sectorSel=document.getElementById('sector');
+const sizeSel=document.getElementById('size');
+[sectorSel,sizeSel].forEach(s=>s.addEventListener('change',()=>{ verdict(); saveState(); }));
+document.getElementById('company').addEventListener('input',saveState);
+function verdict(){
+  const sec=sectorSel.value, sz=sizeSel.value;
+  const v=document.getElementById('verdict');
+  const set=(cls,ico,title,desc)=>{ v.className='verdict '+cls;
+    v.querySelector('.vico').textContent=ico;
+    v.querySelector('.vtitle').textContent=title;
+    v.querySelector('.vdesc').textContent=desc; };
+  if(!sec||!sz){ set('', '?', tr('v_wait_t'), tr('v_wait_d')); return; }
+  if(sec==='none'){ set('out','–', tr('v_none_t'), tr('v_none_d')); return; }
+  if(sz==='micro'||sz==='small'){ set('out','–', tr('v_out_t'), tr('v_out_d')); return; }
+  // medium or large
+  if(sz==='large' && sec==='hi'){ set('ess','!', tr('v_ess_t'), tr('v_ess_d')); }
+  else { set('imp','!', tr('v_imp_t'), tr('v_imp_d')); }
+  if(typeof updateTabStates==='function') updateTabStates();
+}
+
+// ---- document generation ----
+function classifyEntity(sec,sz){
+  const L=lang==='en'
+    ?{u:'To be determined',o:'Probably out of scope',e:'Essential entity',i:'Important entity'}
+    :{u:'Da determinare',o:'Probabilmente fuori ambito',e:'Entità essenziale',i:'Entità importante'};
+  if(!sec||!sz) return L.u;
+  if(sec==='none'||sz==='micro'||sz==='small') return L.o;
+  if(sz==='large'&&sec==='hi') return L.e;
+  return L.i;
+}
+function getProfile(){
+  const ph=lang==='en'?{n:'[Company name]',s:'[sector]',d:'[size]'}:{n:'[Nome azienda]',s:'[settore]',d:'[dimensione]'};
+  const name=(document.getElementById('company').value||'').trim()||ph.n;
+  const sectorLabel = sectorSel.selectedIndex>0 ? sectorSel.options[sectorSel.selectedIndex].text : ph.s;
+  const sizeLabel = sizeSel.selectedIndex>0 ? sizeSel.options[sizeSel.selectedIndex].text.replace(/\s*\(.*\)/,'') : ph.d;
+  return {name, sectorLabel, sizeLabel, entity:classifyEntity(sectorSel.value,sizeSel.value),
+    date:new Date().toLocaleDateString(lang==='en'?'en-GB':'it-IT',{day:'2-digit',month:'long',year:'numeric'})};
+}
+function stateLine(mi){
+  const m=MEASURES[mi]; let no=0,parz=0,si=0;
+  m.q.forEach((q,qi)=>{if(!isActive(mi,qi))return; const v=answers['q_'+mi+'_'+qi]; if(v==='no')no++;else if(v==='parz')parz++;else if(v==='si')si++;});
+  if(lang==='en'){
+    if(no===0&&parz===0&&si>0) return 'Current status: measure assessed as ALREADY IN PLACE. This document formalises existing practice.';
+    if(no>0&&si===0&&parz===0) return 'Current status: measure NOT yet implemented. This document defines the target state to reach; see the roadmap for actions.';
+    return 'Current status: measure PARTIALLY implemented. This document defines the full standard to consolidate.';
+  }
+  if(no===0&&parz===0&&si>0) return 'Stato attuale: misura giudicata GIÀ IN ESSERE. Questo documento formalizza la prassi esistente.';
+  if(no>0&&si===0&&parz===0) return 'Stato attuale: misura NON ancora implementata. Questo documento definisce lo stato obiettivo da raggiungere; vedere la roadmap per le azioni.';
+  return 'Stato attuale: misura PARZIALMENTE implementata. Questo documento definisce lo standard completo da consolidare.';
+}
+function head(p,title,ref,code){
+  const bar='═'.repeat(58);
+  if(lang==='en'){
+    return `${bar}\n${p.name.toUpperCase()}\n${title}\n${bar}\n`+
+`Document:        ${code}
+Version:         1.0
+Issue date:      ${p.date}
+Next review:     within 12 months of the issue date
+Legal reference: ${ref}
+National framework: Legislative Decree 138/2024 (NIS2 transposition, Italy)
+Entity classification (indicative): ${p.entity}
+Profile: ${p.sectorLabel} — ${p.sizeLabel}
+Document owner: ____________________  (Security officer)
+Approved by (management body, NIS2 Art. 20): ____________________
+Signature and approval date: ____________________
+${bar}\n\n`;
+  }
+  return `${bar}\n${p.name.toUpperCase()}\n${title}\n${bar}\n`+
+`Documento:      ${code}
+Versione:       1.0
+Data emissione: ${p.date}
+Prossimo riesame: entro 12 mesi dalla data di emissione
+Riferimento normativo: ${ref}
+Quadro nazionale:      D.Lgs. 138/2024 (recepimento NIS2)
+Classificazione entità (indicativa): ${p.entity}
+Profilo: ${p.sectorLabel} — ${p.sizeLabel}
+Responsabile del documento: ____________________  (Referente sicurezza)
+Approvato da (organo di gestione, art. 20 NIS2): ____________________
+Firma e data approvazione: ____________________
+${bar}\n\n`;
+}
+function foot(){
+  if(lang==='en'){
+    return `\n\n${'─'.repeat(58)}
+Document automatically generated as a NIS2-compliant draft.
+It must be reviewed, adapted to the company's reality and approved by the
+management body before adoption. It does not constitute legal advice.
+Revision history: v1.0 — initial issue.`;
+  }
+  return `\n\n${'─'.repeat(58)}
+Documento generato automaticamente come bozza conforme alla NIS2.
+Va riletto, adattato alla realtà aziendale e approvato dall'organo di
+gestione prima dell'adozione. Non costituisce consulenza legale.
+Registro delle revisioni: v1.0 — emissione iniziale.`;
+}
+function buildDocs(p){
+  if(lang==='en') return buildDocsEN(p);
+  return [
+    {ico:'🛡️',title:'Politica di Sicurezza delle Informazioni',art:'art. 21(2)(a) · art. 20',file:'01_Politica_Sicurezza_Informazioni.txt',
+     body:head(p,'Politica di Sicurezza delle Informazioni','NIS2 (UE 2022/2555) art. 21(2)(a); governance art. 20','POL-SEC-01')+
+`1. SCOPO
+${p.name} adotta la presente politica per garantire la riservatezza, l'integrità e la
+disponibilità delle proprie informazioni e dei sistemi informativi, in conformità agli
+obblighi della direttiva NIS2 e del D.Lgs. 138/2024. La politica esprime l'impegno
+formale della direzione verso la sicurezza delle informazioni.
+
+2. AMBITO DI APPLICAZIONE
+Si applica a tutto il personale, ai collaboratori, ai consulenti e ai fornitori che
+trattano informazioni o accedono ai sistemi di ${p.name}, per tutte le sedi e i
+servizi, inclusi i servizi in cloud.
+
+3. PRINCIPI GUIDA
+- Gestione del rischio: le misure sono proporzionate ai rischi, analizzati almeno una
+  volta l'anno e ad ogni cambiamento significativo.
+- Responsabilità della direzione: l'organo di gestione approva, supervisiona e si forma
+  (art. 20 NIS2).
+- Privilegio minimo e separazione dei compiti.
+- Sicurezza sin dalla progettazione (security by design) nei nuovi sistemi e servizi.
+- Miglioramento continuo sulla base di incidenti, test e audit.
+
+4. OBIETTIVI DI SICUREZZA
+- Proteggere i dati aziendali e dei clienti da accessi non autorizzati.
+- Assicurare la continuità dei processi critici.
+- Rispettare gli obblighi di notifica degli incidenti (art. 23 NIS2).
+
+5. RUOLI E RESPONSABILITÀ
+- Organo di gestione: approva la politica, ne supervisiona l'attuazione, alloca risorse.
+- Referente sicurezza: coordina misure, monitoraggio, incidenti e formazione.
+- Responsabili di funzione: applicano le misure nelle rispettive aree.
+- Tutto il personale: rispetta le procedure e segnala tempestivamente gli incidenti.
+
+6. GESTIONE DEL RISCHIO E DOCUMENTI COLLEGATI
+La presente politica è attuata tramite: Procedura di gestione degli incidenti,
+Piano di continuità e backup, Policy di controllo accessi, e ulteriori procedure
+operative. L'analisi dei rischi ne costituisce il fondamento.
+
+7. CONFORMITÀ
+Il mancato rispetto della politica può comportare provvedimenti disciplinari.
+L'inosservanza degli obblighi NIS2 espone l'azienda e l'organo di gestione a
+sanzioni previste dal D.Lgs. 138/2024.
+
+8. STATO ATTUALE (dall'autovalutazione)
+${stateLine(0)}
+
+9. RIESAME
+La politica è riesaminata almeno annualmente e a fronte di incidenti significativi o
+di modifiche rilevanti all'organizzazione o alla normativa.`+foot()},
+
+    {ico:'🚨',title:'Procedura di Gestione e Notifica degli Incidenti',art:'art. 21(2)(b) · art. 23',file:'02_Procedura_Incidenti.txt',
+     body:head(p,'Procedura di Gestione e Notifica degli Incidenti','NIS2 art. 21(2)(b) (gestione) e art. 23 (notifica)','PROC-IRT-02')+
+`1. OBIETTIVO
+Definire come ${p.name} rileva, classifica, gestisce e notifica gli incidenti di
+sicurezza, rispettando le scadenze legali di notifica al CSIRT competente.
+
+2. DEFINIZIONI
+- Incidente: evento che compromette la disponibilità, l'autenticità, l'integrità o la
+  riservatezza di dati o sistemi.
+- Incidente significativo: incidente che supera le soglie di impatto previste dalla
+  normativa (da valutare secondo i criteri applicabili) e che comporta obbligo di notifica.
+
+3. SCADENZE DI NOTIFICA (art. 23 NIS2)
+- ENTRO 24 ORE  → pre-allerta (early warning) al CSIRT.
+- ENTRO 72 ORE  → notifica con valutazione iniziale di gravità e impatto.
+- SU RICHIESTA  → aggiornamenti intermedi.
+- ENTRO 1 MESE  → relazione finale con cause, impatto e misure adottate.
+
+4. FLUSSO OPERATIVO
+a) RILEVAZIONE — l'incidente è rilevato e registrato nel registro incidenti.
+b) TRIAGE — il referente sicurezza classifica la gravità (vedi §5).
+c) CONTENIMENTO — si limita la propagazione (isolamento sistemi, revoca accessi).
+d) ERADICAZIONE E RIPRISTINO — rimozione della causa e ritorno all'operatività.
+e) NOTIFICA — se significativo, notifica al CSIRT nei termini del §3.
+f) POST-INCIDENTE — analisi delle cause e aggiornamento delle misure.
+
+5. CLASSIFICAZIONE DELLA GRAVITÀ
+- CRITICA: blocco dei processi critici o esfiltrazione di dati.
+- ALTA: impatto rilevante ma circoscritto.
+- MEDIA/BASSA: impatto limitato, nessuna interruzione dei servizi essenziali.
+
+6. RUOLI E CONTATTI DI EMERGENZA
+- Referente sicurezza: ____________________  (tel. ____________________)
+- Sostituto / reperibilità: ____________________
+- CSIRT Italia (ACN): canali ufficiali di notifica.
+- Fornitore IT: ____________________
+
+7. STATO ATTUALE (dall'autovalutazione)
+${stateLine(1)}
+
+8. REGISTRO E RIESAME
+Ogni incidente è tracciato (data, tipologia, impatto, azioni, notifiche). La procedura
+è verificata almeno annualmente, anche tramite simulazioni.`+foot()},
+
+    {ico:'💾',title:'Piano di Backup e Continuità Operativa',art:'art. 21(2)(c)',file:'03_Piano_Continuita_Backup.txt',
+     body:head(p,'Piano di Backup e Continuità Operativa','NIS2 art. 21(2)(c) (continuità, backup, disaster recovery)','PLAN-BCP-03')+
+`1. OBIETTIVO
+Garantire la continuità dei processi critici di ${p.name} e il ripristino tempestivo
+di dati e sistemi in caso di incidente, guasto o attacco (es. ransomware).
+
+2. PROCESSI CRITICI (da compilare)
+Elenco dei processi essenziali e dei sistemi che li supportano:
+- Processo: ____________________  Sistema: ____________________
+- Processo: ____________________  Sistema: ____________________
+
+3. STRATEGIA DI BACKUP
+- Frequenza: backup automatici e regolari di dati e sistemi critici.
+- Regola 3-2-1: 3 copie, su 2 supporti diversi, di cui 1 offline o immutabile
+  (protetta da cancellazione, difesa chiave contro il ransomware).
+- Conservazione: definire la retention (giornaliera/settimanale/mensile).
+
+4. TEST DI RIPRISTINO
+- Test di ripristino reale almeno una volta l'anno, con verifica dell'integrità dei dati.
+- Esito dei test documentato; eventuali anomalie corrette.
+
+5. OBIETTIVI DI RIPRISTINO (RTO / RPO)
+Per ciascun processo critico:
+- RTO (tempo massimo di ripristino): ____________________
+- RPO (massima perdita di dati accettabile): ____________________
+
+6. CONTINUITÀ OPERATIVA E GESTIONE DELLE CRISI
+- Procedure operative alternative in caso di indisponibilità dei sistemi.
+- Ruoli, decisori ed escalation in caso di crisi.
+- Canale di comunicazione di emergenza indipendente dai sistemi ordinari.
+
+7. DISASTER RECOVERY
+Sequenza di ripristino prioritaria dei sistemi essenziali e criteri di attivazione del piano.
+
+8. STATO ATTUALE (dall'autovalutazione)
+${stateLine(2)}
+
+9. RIESAME
+Il piano è testato e aggiornato almeno annualmente e dopo ogni incidente rilevante.`+foot()},
+
+    {ico:'🔑',title:'Policy di Controllo Accessi e Autenticazione',art:'art. 21(2)(i) · art. 21(2)(j)',file:'04_Policy_Controllo_Accessi.txt',
+     body:head(p,'Policy di Controllo Accessi e Autenticazione','NIS2 art. 21(2)(i) (accessi, asset, HR) e (j) (MFA)','POL-IAM-04')+
+`1. OBIETTIVO
+Regolare l'accesso ai sistemi e ai dati di ${p.name} secondo il principio del
+privilegio minimo, con autenticazione forte e gestione controllata degli asset.
+
+2. CICLO DI VITA DEGLI ACCESSI
+- Assegnazione: accessi concessi per ruolo, secondo necessità (need-to-know).
+- Modifica: rivalutazione ad ogni cambio di ruolo.
+- Revoca (offboarding): disattivazione immediata di accessi e credenziali alla cessazione.
+- Riesame periodico: verifica almeno semestrale dei permessi assegnati.
+
+3. PRIVILEGIO MINIMO E ACCOUNT PRIVILEGIATI
+- Ogni utente ha solo i permessi necessari alle proprie mansioni.
+- Gli account amministrativi sono nominali, separati da quelli ordinari e monitorati.
+- Uso limitato e tracciato delle utenze con privilegi elevati.
+
+4. AUTENTICAZIONE A PIÙ FATTORI (MFA)
+- MFA obbligatoria su email, VPN, accessi amministrativi e sistemi critici (art. 21(2)(j)).
+- Adozione progressiva su tutti i servizi che la supportano.
+
+5. GESTIONE DELLE CREDENZIALI
+- Password robuste; uso di un password manager aziendale ove possibile.
+- Divieto di condivisione delle credenziali.
+
+6. GESTIONE DEGLI ASSET
+- Inventario aggiornato di dispositivi, sistemi, applicazioni e servizi cloud.
+- Ogni asset ha un responsabile assegnato.
+- Dismissione sicura di dispositivi e supporti.
+
+7. SICUREZZA DEL PERSONALE (HR)
+- Clausole di riservatezza nei contratti.
+- Consapevolezza delle responsabilità in materia di sicurezza.
+
+8. STATO ATTUALE (dall'autovalutazione)
+${stateLine(8)}
+
+9. RIESAME
+La policy è riesaminata almeno annualmente e ad ogni cambiamento organizzativo rilevante.`+foot()},
+  ];
+}
+function buildDocsEN(p){
+  return [
+    {ico:'🛡️',title:'Information Security Policy',art:'Art. 21(2)(a) · Art. 20',file:'01_Information_Security_Policy.txt',
+     body:head(p,'Information Security Policy','NIS2 (EU 2022/2555) Art. 21(2)(a); governance Art. 20','POL-SEC-01')+
+`1. PURPOSE
+${p.name} adopts this policy to ensure the confidentiality, integrity and availability
+of its information and information systems, in compliance with the NIS2 directive and
+Legislative Decree 138/2024. The policy expresses management's formal commitment to
+information security.
+
+2. SCOPE
+It applies to all staff, collaborators, consultants and suppliers who process
+information or access ${p.name}'s systems, across all sites and services, including
+cloud services.
+
+3. GUIDING PRINCIPLES
+- Risk management: measures are proportionate to risks, analysed at least once a year
+  and at every significant change.
+- Management accountability: the management body approves, oversees and receives
+  training (NIS2 Art. 20).
+- Least privilege and separation of duties.
+- Security by design in new systems and services.
+- Continuous improvement based on incidents, tests and audits.
+
+4. SECURITY OBJECTIVES
+- Protect company and customer data from unauthorised access.
+- Ensure the continuity of critical processes.
+- Meet incident-notification obligations (NIS2 Art. 23).
+
+5. ROLES AND RESPONSIBILITIES
+- Management body: approves the policy, oversees implementation, allocates resources.
+- Security officer: coordinates measures, monitoring, incidents and training.
+- Function heads: apply measures in their respective areas.
+- All staff: follow procedures and promptly report incidents.
+
+6. RISK MANAGEMENT AND RELATED DOCUMENTS
+This policy is implemented through: Incident Management Procedure, Business Continuity
+and Backup Plan, Access Control Policy, and further operating procedures. The risk
+analysis is its foundation.
+
+7. COMPLIANCE
+Failure to comply may lead to disciplinary action. Non-compliance with NIS2 obligations
+exposes the company and its management body to the penalties set out in Legislative
+Decree 138/2024.
+
+8. CURRENT STATUS (from the self-assessment)
+${stateLine(0)}
+
+9. REVIEW
+The policy is reviewed at least annually and following significant incidents or
+relevant changes to the organisation or regulation.`+foot()},
+
+    {ico:'🚨',title:'Incident Management and Notification Procedure',art:'Art. 21(2)(b) · Art. 23',file:'02_Incident_Management_Procedure.txt',
+     body:head(p,'Incident Management and Notification Procedure','NIS2 Art. 21(2)(b) (handling) and Art. 23 (notification)','PROC-IRT-02')+
+`1. OBJECTIVE
+Define how ${p.name} detects, classifies, handles and notifies security incidents,
+meeting the legal deadlines for notification to the competent CSIRT.
+
+2. DEFINITIONS
+- Incident: an event compromising the availability, authenticity, integrity or
+  confidentiality of data or systems.
+- Significant incident: an incident that exceeds the impact thresholds set by the
+  regulation and therefore triggers a notification obligation.
+
+3. NOTIFICATION DEADLINES (NIS2 Art. 23)
+- WITHIN 24 HOURS → early warning to the CSIRT.
+- WITHIN 72 HOURS → notification with an initial severity and impact assessment.
+- ON REQUEST     → intermediate updates.
+- WITHIN 1 MONTH → final report with causes, impact and measures taken.
+
+4. OPERATIONAL FLOW
+a) DETECTION — the incident is detected and logged in the incident register.
+b) TRIAGE — the security officer classifies severity (see §5).
+c) CONTAINMENT — limit propagation (isolate systems, revoke access).
+d) ERADICATION AND RECOVERY — remove the cause and restore operations.
+e) NOTIFICATION — if significant, notify the CSIRT within the deadlines in §3.
+f) POST-INCIDENT — root-cause analysis and update of measures.
+
+5. SEVERITY CLASSIFICATION
+- CRITICAL: outage of critical processes or data exfiltration.
+- HIGH: significant but contained impact.
+- MEDIUM/LOW: limited impact, no disruption to essential services.
+
+6. ROLES AND EMERGENCY CONTACTS
+- Security officer: ____________________  (tel. ____________________)
+- Deputy / on-call: ____________________
+- CSIRT (national authority): official notification channels.
+- IT provider: ____________________
+
+7. CURRENT STATUS (from the self-assessment)
+${stateLine(1)}
+
+8. REGISTER AND REVIEW
+Every incident is logged (date, type, impact, actions, notifications). The procedure is
+tested at least annually, including through simulations.`+foot()},
+
+    {ico:'💾',title:'Backup and Business Continuity Plan',art:'Art. 21(2)(c)',file:'03_Backup_Business_Continuity_Plan.txt',
+     body:head(p,'Backup and Business Continuity Plan','NIS2 Art. 21(2)(c) (continuity, backup, disaster recovery)','PLAN-BCP-03')+
+`1. OBJECTIVE
+Ensure the continuity of ${p.name}'s critical processes and the timely recovery of data
+and systems in case of incident, failure or attack (e.g. ransomware).
+
+2. CRITICAL PROCESSES (to be completed)
+List of essential processes and the systems that support them:
+- Process: ____________________  System: ____________________
+- Process: ____________________  System: ____________________
+
+3. BACKUP STRATEGY
+- Frequency: automatic, regular backups of critical data and systems.
+- 3-2-1 rule: 3 copies, on 2 different media, of which 1 offline or immutable
+  (protected from deletion — a key defence against ransomware).
+- Retention: define the retention (daily/weekly/monthly).
+
+4. RESTORE TESTING
+- Real restore test at least once a year, verifying data integrity.
+- Test outcomes documented; any anomalies corrected.
+
+5. RECOVERY OBJECTIVES (RTO / RPO)
+For each critical process:
+- RTO (maximum recovery time): ____________________
+- RPO (maximum acceptable data loss): ____________________
+
+6. BUSINESS CONTINUITY AND CRISIS MANAGEMENT
+- Alternative operating procedures when systems are unavailable.
+- Roles, decision-makers and escalation in a crisis.
+- Emergency communication channel independent of ordinary systems.
+
+7. DISASTER RECOVERY
+Priority recovery sequence of essential systems and plan-activation criteria.
+
+8. CURRENT STATUS (from the self-assessment)
+${stateLine(2)}
+
+9. REVIEW
+The plan is tested and updated at least annually and after every relevant incident.`+foot()},
+
+    {ico:'🔑',title:'Access Control and Authentication Policy',art:'Art. 21(2)(i) · Art. 21(2)(j)',file:'04_Access_Control_Policy.txt',
+     body:head(p,'Access Control and Authentication Policy','NIS2 Art. 21(2)(i) (access, assets, HR) and (j) (MFA)','POL-IAM-04')+
+`1. OBJECTIVE
+Govern access to ${p.name}'s systems and data based on the principle of least
+privilege, with strong authentication and controlled asset management.
+
+2. ACCESS LIFECYCLE
+- Assignment: access granted by role, on a need-to-know basis.
+- Change: re-evaluation at every role change.
+- Revocation (offboarding): immediate disabling of access and credentials on departure.
+- Periodic review: at least six-monthly verification of assigned permissions.
+
+3. LEAST PRIVILEGE AND PRIVILEGED ACCOUNTS
+- Each user has only the permissions needed for their tasks.
+- Administrative accounts are named, separate from ordinary ones, and monitored.
+- Limited and logged use of accounts with elevated privileges.
+
+4. MULTI-FACTOR AUTHENTICATION (MFA)
+- MFA mandatory on email, VPN, administrative access and critical systems (Art. 21(2)(j)).
+- Progressive rollout across all services that support it.
+
+5. CREDENTIAL MANAGEMENT
+- Strong passwords; use of a company password manager where possible.
+- No sharing of credentials.
+
+6. ASSET MANAGEMENT
+- Up-to-date inventory of devices, systems, applications and cloud services.
+- Each asset has an assigned owner.
+- Secure disposal of devices and media.
+
+7. HUMAN RESOURCES SECURITY
+- Confidentiality clauses in contracts.
+- Awareness of security responsibilities.
+
+8. CURRENT STATUS (from the self-assessment)
+${stateLine(8)}
+
+9. REVIEW
+The policy is reviewed at least annually and at every relevant organisational change.`+foot()},
+  ];
+}
+function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+let DOCS=[];
+function genDocs(scroll){
+  const p=getProfile();
+  DOCS=buildDocs(p);
+  document.getElementById('docCompany').textContent=p.name;
+  document.getElementById('docList').innerHTML=DOCS.map((d,i)=>`
+    <div class="doc-item">
+      <div class="doc-h">
+        <span class="doc-ico" aria-hidden="true">${d.ico}</span>
+        <div class="doc-meta"><b>${d.title}</b><small>${d.art}</small></div>
+        <button class="doc-btn" data-copy="${i}">${tr('copy')}</button>
+        <button class="doc-btn" data-dl="${i}">${tr('download')}</button>
+      </div>
+      <textarea class="doc-edit" id="doctext-${i}" spellcheck="false" aria-label="Contenuto del documento, modificabile">${escapeHtml(d.body)}</textarea>
+    </div>`).join('');
+  document.getElementById('docStep').hidden=false;
+  document.getElementById('docs').hidden=false;
+  updateTabStates();
+  saveState();
+  if(scroll!==false) document.getElementById('docStep').scrollIntoView({behavior:'smooth',block:'start'});
+}
+document.getElementById('docGenBtn').addEventListener('click',()=>genDocs(true));
+document.getElementById('docList').addEventListener('click',e=>{
+  const cp=e.target.closest('[data-copy]'), dl=e.target.closest('[data-dl]');
+  if(cp){ const ta=document.getElementById('doctext-'+cp.dataset.copy); navigator.clipboard?.writeText(ta.value);
+    cp.textContent=tr('copied'); setTimeout(()=>cp.textContent=tr('copy'),1500); }
+  if(dl){ const i=+dl.dataset.dl; const ta=document.getElementById('doctext-'+i);
+    const url=URL.createObjectURL(new Blob([ta.value],{type:'text/plain;charset=utf-8'}));
+    const a=document.createElement('a'); a.href=url; a.download=DOCS[i].file; document.body.appendChild(a); a.click();
+    a.remove(); URL.revokeObjectURL(url); }
+});
+
+// ---- external scanner (demo) ----
+function seedFromStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function pick(r,arr){ for(const [t,o] of arr){ if(r<t) return o; } return arr[arr.length-1][1]; }
+const CATMAP={Email:{it:'Email',en:'Email'},DNS:{it:'DNS',en:'DNS'},TLS:{it:'TLS',en:'TLS'},HTTP:{it:'HTTP',en:'HTTP'},Rete:{it:'Rete',en:'Network'},Esposizione:{it:'Esposizione',en:'Exposure'}};
+const FIX={
+  "SPF missing":{do:{it:"Aggiungi un record SPF che elenca i server autorizzati a inviare la tua email.",en:"Add an SPF record listing the servers allowed to send your email."},dont:{it:"Non usare un SPF troppo permissivo (es. +all): annulla la protezione.",en:"Don't use an over-permissive SPF (e.g. +all): it cancels the protection."}},
+  "DMARC not enforced":{do:{it:"Porta gradualmente la policy DMARC da p=none a p=quarantine e poi p=reject.",en:"Gradually move the DMARC policy from p=none to p=quarantine, then p=reject."},dont:{it:"Non lasciare p=none a lungo: rileva ma non blocca gli abusi.",en:"Don't leave p=none for long: it detects but doesn't block abuse."}},
+  "DMARC missing":{do:{it:"Pubblica un record DMARC partendo da p=none per monitorare, poi irrigidiscilo.",en:"Publish a DMARC record starting at p=none to monitor, then tighten it."},dont:{it:"Non passare subito a p=reject senza aver verificato i flussi legittimi.",en:"Don't jump straight to p=reject before verifying legitimate flows."}},
+  "DNSSEC not enabled":{do:{it:"Abilita DNSSEC presso il tuo provider DNS o registrar.",en:"Enable DNSSEC at your DNS provider or registrar."},dont:{it:"Non abilitarlo senza gestire correttamente le chiavi: rischi disservizi DNS.",en:"Don't enable it without proper key management: you risk DNS outages."}},
+  "Obsolete TLS protocols":{do:{it:"Disattiva TLS 1.0/1.1 e abilita solo TLS 1.2 e 1.3.",en:"Disable TLS 1.0/1.1 and enable only TLS 1.2 and 1.3."},dont:{it:"Non mantenere protocolli obsoleti per compatibilità con sistemi vecchi.",en:"Don't keep obsolete protocols for legacy compatibility."}},
+  "Weak encryption":{do:{it:"Rimuovi i cifrari deboli e usa suite moderne (AEAD).",en:"Remove weak ciphers and use modern suites (AEAD)."},dont:{it:"Non privilegiare la compatibilità a scapito della sicurezza.",en:"Don't favour compatibility at the expense of security."}},
+  "HSTS missing":{do:{it:"Aggiungi l'header Strict-Transport-Security con un max-age adeguato.",en:"Add the Strict-Transport-Security header with an adequate max-age."},dont:{it:"Non attivare preload/sottodomini prima di aver testato l'HTTPS ovunque.",en:"Don't enable preload/subdomains before HTTPS is tested everywhere."}},
+  "Certificate expiring imminently":{do:{it:"Rinnova subito il certificato e attiva il rinnovo automatico (es. ACME/Let's Encrypt).",en:"Renew the certificate now and enable auto-renewal (e.g. ACME/Let's Encrypt)."},dont:{it:"Non aspettare la scadenza: eviti downtime e avvisi di sicurezza ai visitatori.",en:"Don't wait for expiry: you avoid downtime and security warnings to visitors."}},
+  "Certificate expiring soon":{do:{it:"Programma il rinnovo del certificato e attiva il rinnovo automatico.",en:"Schedule the certificate renewal and enable auto-renewal."},dont:{it:"Non rimandare fino a pochi giorni dalla scadenza.",en:"Don't put it off until a few days before expiry."}},
+  "Content-Security-Policy missing":{do:{it:"Aggiungi una Content-Security-Policy restrittiva, testandola prima in report-only.",en:"Add a restrictive Content-Security-Policy, testing it first in report-only mode."},dont:{it:"Non usare una CSP permissiva con unsafe-inline: vanifica i benefici.",en:"Don't use a permissive CSP with unsafe-inline: it defeats the purpose."}},
+  "Incomplete security headers":{do:{it:"Aggiungi X-Frame-Options: DENY e X-Content-Type-Options: nosniff.",en:"Add X-Frame-Options: DENY and X-Content-Type-Options: nosniff."},dont:{it:"Non lasciare le pagine incorniciabili: rischio di clickjacking.",en:"Don't leave pages framable: clickjacking risk."}},
+  "RDP port (3389) exposed":{do:{it:"Chiudi la porta RDP da Internet e usa una VPN o un bastion host.",en:"Close the RDP port from the Internet and use a VPN or a bastion host."},dont:{it:"Non esporre mai RDP direttamente a Internet, nemmeno con password forte.",en:"Never expose RDP directly to the Internet, even with a strong password."}},
+  "Database port exposed":{do:{it:"Rendi il database raggiungibile solo dalla rete interna o via VPN.",en:"Make the database reachable only from the internal network or via VPN."},dont:{it:"Non lasciare la porta del database aperta verso Internet sul firewall.",en:"Don't leave the database port open to the Internet on the firewall."}},
+  "Admin panel reachable":{do:{it:"Limita l'accesso al pannello admin per IP o dietro VPN e attiva l'MFA.",en:"Restrict admin panel access by IP or behind a VPN, and enable MFA."},dont:{it:"Non lasciare /admin accessibile pubblicamente senza restrizioni.",en:"Don't leave /admin publicly accessible without restrictions."}},
+  "Sensitive files exposed":{do:{it:"Rimuovi i file sensibili dalla webroot e blocca l'accesso a .git e ai backup.",en:"Remove sensitive files from the webroot and block access to .git and backups."},dont:{it:"Non lasciare repository o backup accessibili dal web.",en:"Don't leave repositories or backups accessible from the web."}},
+};
+function buildScan(domain){
+  const rng=mulberry32(seedFromStr(domain.toLowerCase()));
+  const F=[];
+  F.push(Object.assign({cat:'Email',ref:'art. 21(2)(e)'}, pick(rng(),[
+    [.7,{status:'ok',name:{it:'SPF configurato',en:'SPF configured'},detail:{it:'Record SPF presente: il dominio limita chi può inviare email a suo nome.',en:'SPF record present: the domain limits who can send email on its behalf.'}}],
+    [1,{status:'crit',name:{it:'SPF assente',en:'SPF missing'},detail:{it:'Nessun record SPF: chiunque può falsificare email dal tuo dominio (spoofing).',en:'No SPF record: anyone can spoof email from your domain.'}}],
+  ])));
+  F.push(Object.assign({cat:'Email',ref:'art. 21(2)(e)'}, pick(rng(),[
+    [.4,{status:'ok',name:{it:'DMARC applicato',en:'DMARC enforced'},detail:{it:'DMARC con policy di enforcement (reject/quarantine): protezione anti-phishing attiva.',en:'DMARC with an enforcement policy (reject/quarantine): anti-phishing protection active.'}}],
+    [.8,{status:'warn',name:{it:'DMARC non applicato',en:'DMARC not enforced'},detail:{it:'DMARC presente ma con policy p=none: rileva ma non blocca le email falsificate.',en:'DMARC present but with p=none: it detects but does not block spoofed email.'}}],
+    [1,{status:'crit',name:{it:'DMARC assente',en:'DMARC missing'},detail:{it:'Nessun DMARC: il dominio è esposto a phishing e impersonificazione.',en:'No DMARC: the domain is exposed to phishing and impersonation.'}}],
+  ])));
+  F.push(Object.assign({cat:'DNS',ref:'art. 21(2)(e)'}, pick(rng(),[
+    [.35,{status:'ok',name:{it:'DNSSEC attivo',en:'DNSSEC enabled'},detail:{it:'Le risposte DNS sono firmate: protezione contro la manipolazione dei record DNS.',en:'DNS responses are signed: protection against DNS record tampering.'}}],
+    [1,{status:'warn',name:{it:'DNSSEC non attivo',en:'DNSSEC not enabled'},detail:{it:'DNSSEC non configurato: possibili attacchi di manipolazione DNS.',en:'DNSSEC not configured: DNS tampering attacks are possible.'}}],
+  ])));
+  F.push(Object.assign({cat:'TLS',ref:'art. 21(2)(h)'}, pick(rng(),[
+    [.55,{status:'ok',name:{it:'TLS moderno',en:'Modern TLS'},detail:{it:'Supportato TLS 1.3/1.2; protocolli obsoleti disabilitati.',en:'TLS 1.3/1.2 supported; obsolete protocols disabled.'}}],
+    [.85,{status:'warn',name:{it:'Protocolli TLS obsoleti',en:'Obsolete TLS protocols'},detail:{it:'Il server accetta ancora TLS 1.0/1.1: cifratura debole, da disattivare.',en:'The server still accepts TLS 1.0/1.1: weak encryption, to be disabled.'}}],
+    [1,{status:'crit',name:{it:'Cifratura debole',en:'Weak encryption'},detail:{it:'Supporto a cifrari deboli/obsoleti: comunicazioni potenzialmente intercettabili.',en:'Support for weak/obsolete ciphers: communications potentially interceptable.'}}],
+  ])));
+  F.push(Object.assign({cat:'HTTP',ref:'art. 21(2)(h)'}, pick(rng(),[
+    [.5,{status:'ok',name:{it:'HSTS attivo',en:'HSTS enabled'},detail:{it:'HTTP Strict Transport Security forza le connessioni cifrate.',en:'HTTP Strict Transport Security enforces encrypted connections.'}}],
+    [1,{status:'warn',name:{it:'HSTS mancante',en:'HSTS missing'},detail:{it:'Senza HSTS un utente può essere reindirizzato su connessione non cifrata.',en:'Without HSTS a user can be redirected over an unencrypted connection.'}}],
+  ])));
+  const days=5+Math.floor(rng()*400);
+  F.push({cat:'TLS',ref:'art. 21(2)(h)', status: days<15?'crit':(days<40?'warn':'ok'),
+    name:{it: days<15?'Certificato in scadenza imminente':(days<40?'Certificato in scadenza':'Certificato valido'),
+          en: days<15?'Certificate expiring imminently':(days<40?'Certificate expiring soon':'Certificate valid')},
+    detail:{it:`Il certificato TLS scade tra ${days} giorni.`+(days<40?' Pianifica il rinnovo per evitare disservizi.':''),
+            en:`The TLS certificate expires in ${days} days.`+(days<40?' Plan the renewal to avoid downtime.':'')}});
+  F.push(Object.assign({cat:'HTTP',ref:'art. 21(2)(e)'}, pick(rng(),[
+    [.35,{status:'ok',name:{it:'Content-Security-Policy presente',en:'Content-Security-Policy present'},detail:{it:'Header CSP configurato: mitigazione degli attacchi cross-site scripting (XSS).',en:'CSP header configured: mitigation of cross-site scripting (XSS) attacks.'}}],
+    [1,{status:'warn',name:{it:'Content-Security-Policy assente',en:'Content-Security-Policy missing'},detail:{it:'Manca l\'header CSP: maggiore rischio di cross-site scripting.',en:'The CSP header is missing: higher cross-site scripting risk.'}}],
+  ])));
+  F.push(Object.assign({cat:'HTTP',ref:'art. 21(2)(e)'}, pick(rng(),[
+    [.5,{status:'ok',name:{it:'Header di sicurezza presenti',en:'Security headers present'},detail:{it:'X-Frame-Options / X-Content-Type-Options configurati.',en:'X-Frame-Options / X-Content-Type-Options configured.'}}],
+    [1,{status:'warn',name:{it:'Header di sicurezza incompleti',en:'Incomplete security headers'},detail:{it:'Mancano header come X-Frame-Options: rischio di clickjacking.',en:'Headers such as X-Frame-Options are missing: clickjacking risk.'}}],
+  ])));
+  F.push(Object.assign({cat:'Rete',ref:'art. 21(2)(i)'}, pick(rng(),[
+    [.5,{status:'ok',name:{it:'Nessuna porta di amministrazione esposta',en:'No management ports exposed'},detail:{it:'Non risultano servizi di gestione (RDP/SSH/DB) esposti a Internet.',en:'No management services (RDP/SSH/DB) appear exposed to the Internet.'}}],
+    [.8,{status:'crit',name:{it:'Porta RDP (3389) esposta',en:'RDP port (3389) exposed'},detail:{it:'Accesso desktop remoto esposto a Internet: bersaglio primario per attacchi.',en:'Remote desktop access exposed to the Internet: a primary attack target.'}}],
+    [1,{status:'crit',name:{it:'Porta database esposta',en:'Database port exposed'},detail:{it:'Un servizio database (es. 3306/5432) risulta raggiungibile da Internet.',en:'A database service (e.g. 3306/5432) appears reachable from the Internet.'}}],
+  ])));
+  F.push(Object.assign({cat:'Esposizione',ref:'art. 21(2)(e)'}, pick(rng(),[
+    [.6,{status:'ok',name:{it:'Nessuna esposizione evidente',en:'No obvious exposure'},detail:{it:'Non rilevati pannelli o file sensibili accessibili pubblicamente.',en:'No publicly accessible panels or sensitive files detected.'}}],
+    [.85,{status:'warn',name:{it:'Pannello di amministrazione raggiungibile',en:'Admin panel reachable'},detail:{it:'Trovata una pagina /admin accessibile: proteggila con restrizioni di accesso.',en:'An accessible /admin page was found: protect it with access restrictions.'}}],
+    [1,{status:'crit',name:{it:'File sensibili esposti',en:'Sensitive files exposed'},detail:{it:'Rilevati file potenzialmente sensibili (es. .git, backup): rimuovili dalla pubblicazione.',en:'Potentially sensitive files detected (e.g. .git, backups): remove them from publication.'}}],
+  ])));
+  const order={crit:0,warn:1,ok:2};
+  F.sort((a,b)=>order[a.status]-order[b.status]);
+  const crit=F.filter(f=>f.status==='crit').length, warn=F.filter(f=>f.status==='warn').length, ok=F.filter(f=>f.status==='ok').length;
+  let score=Math.max(5,Math.min(100,100-crit*18-warn*8));
+  return {F,crit,warn,ok,score,domain};
+}
+function scanBucket(s){return s<45?'crit':(s<75?'warn':'good');}
+function applyScanFilter(el,f,cell){
+  el.querySelectorAll('.sc-cell').forEach(x=>x.classList.toggle('active', x===cell));
+  el.querySelectorAll('.finding').forEach(fd=>{ fd.style.display=(f==='all'||fd.dataset.status===f)?'':'none'; });
+  const list=el.querySelector('.findings');
+  const any=[...el.querySelectorAll('.finding')].some(fd=>fd.style.display!=='none');
+  let em=el.querySelector('.findings-empty');
+  if(!any){ if(!em){ em=document.createElement('div'); em.className='findings-empty'; list.appendChild(em);} em.textContent=tr('sc_none'); em.hidden=false; }
+  else if(em){ em.hidden=true; }
+}
+function renderScan(domain){
+  const r=buildScan(domain);
+  const el=document.getElementById('scanResult');
+  el.innerHTML=`
+    <div class="scan-summary">
+      <div class="cell sc-cell c-${scanBucket(r.score)} active" data-filter="all" role="button" tabindex="0" title="${tr('sc_all')}"><div class="cv">${r.score}</div><div class="cl">${tr('sc_score')}</div></div>
+      <div class="cell sc-cell c-crit" data-filter="crit" role="button" tabindex="0"><div class="cv">${r.crit}</div><div class="cl">${tr('sc_crit')}</div></div>
+      <div class="cell sc-cell c-warn" data-filter="warn" role="button" tabindex="0"><div class="cv">${r.warn}</div><div class="cl">${tr('sc_warn')}</div></div>
+      <div class="cell sc-cell c-good" data-filter="ok" role="button" tabindex="0"><div class="cv">${r.ok}</div><div class="cl">${tr('sc_ok')}</div></div>
+    </div>
+    <div class="findings">
+    ${r.F.map(f=>{
+      const fx = f.status!=='ok' ? FIX[f.name.en] : null;
+      return `
+      <div class="finding" data-status="${f.status}">
+        <span class="f-dot ${f.status}" aria-hidden="true"></span>
+        <div class="f-body">
+          <span class="f-cat">${CATMAP[f.cat][lang]} · ${r.domain}</span>
+          <b>${f.name[lang]}</b>
+          <p>${f.detail[lang]}</p>
+          ${fx?`<div class="fix">
+            <div class="fix-t">${tr('fix_title')}</div>
+            <div class="fix-row"><span class="fx ok">${tr('fix_do')}</span><span>${fx.do[lang]}</span></div>
+            <div class="fix-row"><span class="fx no">${tr('fix_dont')}</span><span>${fx.dont[lang]}</span></div>
+          </div>`:''}
+          <span class="f-ref">NIS2 ${f.ref}</span>
+        </div>
+      </div>`;}).join('')}
+    </div>`;
+  el.querySelectorAll('.sc-cell').forEach(c=>{
+    const act=()=>applyScanFilter(el,c.dataset.filter,c);
+    c.addEventListener('click',act);
+    c.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+  });
+  el.hidden=false;
+  saveState();
+}
+document.getElementById('scanBtn').addEventListener('click',()=>{
+  const inp=document.getElementById('domain');
+  const d=(inp.value||'').trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  if(!d){ inp.focus(); return; }
+  renderScan(d);
+  document.getElementById('scanResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+document.getElementById('domain').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('scanBtn').click(); });
+
+// ---- reset ----
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  try{ localStorage.removeItem(SKEY); }catch(e){}
+  for(const k in answers) delete answers[k];
+  renderMeasures();
+  sectorSel.value=''; sizeSel.value=''; document.getElementById('company').value=''; verdict();
+  document.getElementById('report').hidden=true;
+  document.getElementById('reportEmpty').hidden=false;
+  document.getElementById('docStep').hidden=true;
+  document.getElementById('docs').hidden=true;
+  document.getElementById('domain').value='';
+  document.getElementById('scanResult').hidden=true;
+  recompute();
+  showTab(0);
+});
+
+// ---- tabs ----
+function showTab(i){
+  activeTab=i;
+  document.querySelectorAll('.tabpanel').forEach(p=>{ p.hidden = (+p.dataset.panel!==i); });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', +t.dataset.tab===i));
+  updateTabStates();
+  saveState();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function updateTabStates(){
+  const t=document.querySelectorAll('.tab');
+  if(t[0]) t[0].classList.toggle('done', !!(sectorSel.value && sizeSel.value));
+  if(t[1]) t[1].classList.toggle('done', !document.getElementById('report').hidden);
+  if(t[2]) t[2].classList.toggle('done', !document.getElementById('docs').hidden);
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showTab(+t.dataset.tab)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showTab(+b.dataset.goto)));
+
+// ---- language switch ----
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = tr(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{ el.innerHTML = tr(el.getAttribute('data-i18n-html')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.setAttribute('placeholder', tr(el.getAttribute('data-i18n-ph'))); });
+  document.querySelectorAll('#sector option, #size option').forEach(o=>{ if(o.dataset[lang]) o.textContent=o.dataset[lang]; });
+  document.querySelectorAll('#sector optgroup').forEach(g=>{ if(g.dataset[lang]) g.label=g.dataset[lang]; });
+  renderMeasures();
+  verdict();
+  recompute();
+  if(!document.getElementById('report').hidden) genReport(false);
+  if(!document.getElementById('docs').hidden) genDocs(false);
+  if(!document.getElementById('scanResult').hidden){
+    const d=(document.getElementById('domain').value||'').trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+    if(d) renderScan(d);
+  }
+}
+document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>{
+  lang=b.dataset.lang;
+  document.querySelectorAll('.lang-btn').forEach(x=>x.classList.toggle('active',x.dataset.lang===lang));
+  applyLang();
+  saveState();
+}));
+
+// ---- persistence (auto-save & resume) ----
+const SKEY='bastione_nis2_v1';
+function saveState(){
+  try{ localStorage.setItem(SKEY, JSON.stringify({
+    lang, tab:activeTab,
+    company:document.getElementById('company').value,
+    sector:sectorSel.value, size:sizeSel.value,
+    answers,
+    domain:document.getElementById('domain').value,
+    reportGen:!document.getElementById('report').hidden,
+    docsGen:!document.getElementById('docs').hidden,
+    scanGen:!document.getElementById('scanResult').hidden
+  })); }catch(e){}
+}
+function loadState(){ try{ return JSON.parse(localStorage.getItem(SKEY)); }catch(e){ return null; } }
+
+(function restore(){
+  const s=loadState();
+  if(!s){ applyLang(); return; }
+  lang = s.lang==='en'?'en':'it';
+  document.querySelectorAll('.lang-btn').forEach(x=>x.classList.toggle('active',x.dataset.lang===lang));
+  document.getElementById('company').value = s.company||'';
+  sectorSel.value = s.sector||''; sizeSel.value = s.size||'';
+  if(s.answers) Object.keys(s.answers).forEach(k=>{ answers[k]=s.answers[k]; });
+  if(s.domain) document.getElementById('domain').value = s.domain;
+  applyLang();                       // renders measures with saved answers, verdict, recompute
+  if(s.reportGen) genReport(false);
+  if(s.docsGen) genDocs(false);
+  if(s.scanGen && s.domain){
+    const d=(s.domain||'').trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+    if(d) renderScan(d);
+  }
+  showTab(Number.isInteger(s.tab)?s.tab:0);
+})();
+</script>
+</body>
+</html>
