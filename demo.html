@@ -244,6 +244,10 @@
   .stat .sv{font-family:var(--font-mono);font-size:1.7rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
   .stat .sl{font-size:.78rem;color:var(--muted);margin-top:2px;}
   .stat.c-crit .sv{color:var(--crit);} .stat.c-warn .sv{color:var(--warn);} .stat.c-good .sv{color:var(--good);}
+  .stat.rf-cell{cursor:pointer;transition:.14s;position:relative;}
+  .stat.rf-cell:hover{background:var(--surface-2);}
+  .stat.rf-cell.active{box-shadow:inset 0 0 0 2px var(--accent);}
+  .stat.rf-cell:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
 
   .road{padding:8px 22px 22px;}
   .road h3{font-size:.95rem;margin:20px 0 4px;letter-spacing:-.01em;}
@@ -304,15 +308,47 @@
     color:var(--accent);background:var(--accent-weak);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
     padding:2px 7px;border-radius:6px;flex:none;}
   .doc-list{display:flex;flex-direction:column;gap:12px;}
-  .doc-item{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface-2);}
-  .doc-h{display:flex;align-items:center;gap:12px;padding:13px 15px;}
+  .doc-item{display:flex;flex-direction:column;gap:11px;}
+  .doc-h{display:flex;align-items:center;gap:12px;padding:0 2px;}
   .doc-ico{font-size:1.15rem;flex:none;}
   .doc-meta{flex:1;min-width:0;}
   .doc-meta b{font-size:.94rem;font-weight:600;display:block;letter-spacing:-.01em;}
   .doc-meta small{color:var(--faint);font-family:var(--font-mono);font-size:.71rem;text-transform:uppercase;letter-spacing:.03em;}
-  .doc-btn{font:inherit;font-size:.78rem;font-weight:500;padding:6px 12px;border-radius:8px;cursor:pointer;flex:none;
+  .doc-btn{font:inherit;font-size:.78rem;font-weight:600;padding:7px 13px;border-radius:8px;cursor:pointer;flex:none;
     border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);transition:.14s;}
   .doc-btn:hover{color:var(--text);border-color:var(--accent);}
+  .doc-btn.primary{background:linear-gradient(150deg,var(--accent),var(--accent-ink));color:#fff;border:0;}
+  .doc-btn.primary:hover{filter:brightness(1.07);color:#fff;}
+
+  /* Document "paper" page */
+  .doc-page{background:#ffffff;color:#1a2230;border:1px solid #dfe4ec;border-radius:12px;
+    padding:40px clamp(20px,4vw,46px);box-shadow:0 6px 24px rgba(16,24,40,.10);}
+  .doc-page:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .dp-head{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    border-bottom:2px solid #1a3ab0;padding-bottom:12px;margin-bottom:20px;}
+  .dp-brand{display:flex;align-items:center;gap:9px;font-family:var(--font-sans);font-weight:800;font-size:1.18rem;
+    letter-spacing:-.02em;color:#1a3ab0;}
+  .dp-mark{width:27px;height:27px;border-radius:7px;display:grid;place-items:center;flex:none;
+    background:linear-gradient(150deg,#2E56E6,#1A3AB0);}
+  .dp-mark svg{width:15px;height:15px;display:block;}
+  .dp-code{font-family:var(--font-mono);font-size:.72rem;color:#6b7280;letter-spacing:.02em;}
+  .dp-title{font-family:var(--font-sans);font-size:1.55rem;font-weight:750;letter-spacing:-.025em;margin:0 0 3px;color:#111827;line-height:1.15;}
+  .dp-company{font-family:var(--font-sans);font-size:.82rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.06em;margin-bottom:18px;}
+  .dp-meta{width:100%;border-collapse:collapse;margin-bottom:24px;font-family:var(--font-sans);}
+  .dp-meta td{padding:6px 10px;border:1px solid #e5e7eb;font-size:.79rem;vertical-align:top;line-height:1.4;}
+  .dp-meta td:first-child{color:#6b7280;width:40%;font-weight:600;}
+  .dp-body{font-family:Georgia,"Times New Roman",serif;color:#1f2937;font-size:.96rem;line-height:1.6;}
+  .dp-body h3{font-family:var(--font-sans);font-size:.98rem;font-weight:700;color:#1a3ab0;margin:22px 0 7px;letter-spacing:-.01em;}
+  .dp-body h3:first-child{margin-top:0;}
+  .dp-body p{margin:0 0 10px;}
+  .dp-body ul{margin:0 0 13px;padding-left:22px;}
+  .dp-body li{margin:4px 0;}
+  .dp-sign{display:grid;grid-template-columns:1fr 1fr;gap:24px 34px;margin:30px 0 16px;font-family:var(--font-sans);}
+  .dp-sign-row{font-size:.78rem;color:#374151;font-weight:600;}
+  .dp-sign-row .dp-line{display:block;border-bottom:1px solid #9ca3af;height:26px;margin-top:6px;}
+  .dp-foot{border-top:1px solid #e5e7eb;padding-top:12px;margin-top:10px;font-size:.71rem;color:#9ca3af;
+    font-family:var(--font-sans);line-height:1.45;}
+  @media (max-width:520px){.dp-sign{grid-template-columns:1fr;}}
   .doc-preview{margin:0;max-height:240px;overflow:auto;padding:16px;background:var(--surface);border-top:1px solid var(--border);
     font-family:var(--font-mono);font-size:.75rem;line-height:1.65;white-space:pre-wrap;color:var(--text);}
   .doc-edit{display:block;width:100%;box-sizing:border-box;border:0;border-top:1px solid var(--border);
@@ -366,6 +402,13 @@
 
   @media print{header.top,aside,.cta,.report-actions,.ghost-btn,.doc-btn,.scan-form,.scan-note,.tabs,.tabnav{display:none!important;}
     body{background:#fff;} .layout{grid-template-columns:1fr;}}
+  @media print{
+    body.printing-doc *{visibility:hidden!important;}
+    body.printing-doc .doc-page.printing, body.printing-doc .doc-page.printing *{visibility:visible!important;}
+    body.printing-doc .doc-page.printing{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:0;
+      border-radius:0;margin:0;padding:6mm 4mm;}
+    body.printing-doc .doc-page.printing:focus-visible{outline:none;}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
 </style>
 
@@ -390,8 +433,9 @@
   <nav class="tabs" id="tabs" role="tablist" aria-label="Passi">
     <button class="tab active" data-tab="0" type="button" role="tab"><span class="tnum">01</span><span class="tlab" data-i18n="tab1">Ambito</span></button>
     <button class="tab" data-tab="1" type="button" role="tab"><span class="tnum">02</span><span class="tlab" data-i18n="tab2">Autovalutazione</span></button>
-    <button class="tab" data-tab="2" type="button" role="tab"><span class="tnum">03</span><span class="tlab" data-i18n="tab3">Report e documenti</span></button>
-    <button class="tab" data-tab="3" type="button" role="tab"><span class="tnum">04</span><span class="tlab" data-i18n="tab4">Scanner</span></button>
+    <button class="tab" data-tab="2" type="button" role="tab"><span class="tnum">03</span><span class="tlab" data-i18n="tab3">Report</span></button>
+    <button class="tab" data-tab="3" type="button" role="tab"><span class="tnum">04</span><span class="tlab" data-i18n="tab4">Documenti</span></button>
+    <button class="tab" data-tab="4" type="button" role="tab"><span class="tnum">05</span><span class="tlab" data-i18n="tab5">Scanner</span></button>
   </nav>
 
   <section class="tabpanel" data-panel="0">
@@ -525,26 +569,33 @@
           <button class="ghost-btn" onclick="window.print()" data-i18n="print">Esporta / Stampa report</button>
         </div>
       </section>
-
-      <div class="step-head" id="docStep" hidden><h2 data-i18n="step3">I tuoi documenti di conformità</h2><span class="hint" data-i18n="hint3">generati automaticamente</span></div>
-      <section class="card docs" id="docs" hidden>
-        <p class="doc-intro"><span class="ai-tag">AI</span>
-          <span data-i18n-html="docintro">Documenti precompilati sui dati e sulle risposte di <b id="docCompany">la tua azienda</b>. <b>Puoi modificarli direttamente qui sotto</b>, poi copiarli o scaricarli. Nel prodotto finale il testo viene adattato dall'AI caso per caso. Da revisionare e far approvare dalla direzione prima dell'adozione.</span>
-        </p>
-        <div class="doc-list" id="docList"></div>
-      </section>
     <div class="tabnav">
       <button class="ghost-btn nav-adv" data-goto="1" data-i18n="back">← Indietro</button>
-      <button class="cta nav-adv" data-goto="3" data-i18n="next_scan" style="width:auto;margin:0">Vai allo scanner →</button>
+      <button class="cta nav-adv" data-goto="3" data-i18n="next_docs" style="width:auto;margin:0">Vai ai documenti →</button>
     </div>
   </section>
 
   <section class="tabpanel" data-panel="3" hidden>
-    <div class="step-head"><h2 data-i18n="step4">Verifica tecnica esterna</h2><span class="hint" data-i18n="hint4">scanner · lead magnet</span></div>
+    <div class="empty-hint" id="docsEmpty" data-i18n="docs_empty">Genera prima il gap report, poi crea i documenti dalla scheda Report.</div>
+    <div class="step-head" id="docStep" hidden><h2 data-i18n="step3">I tuoi documenti di conformità</h2><span class="hint" data-i18n="hint3">generati automaticamente</span></div>
+    <section class="card docs" id="docs" hidden>
+      <p class="doc-intro"><span class="ai-tag">AI</span>
+        <span data-i18n-html="docintro">Documenti precompilati sui dati e sulle risposte di <b id="docCompany">la tua azienda</b>. <b>Puoi modificarli direttamente qui sotto</b>, poi copiarli o scaricarli. Nel prodotto finale il testo viene adattato dall'AI caso per caso. Da revisionare e far approvare dalla direzione prima dell'adozione.</span>
+      </p>
+      <div class="doc-list" id="docList"></div>
+    </section>
+    <div class="tabnav">
+      <button class="ghost-btn nav-adv" data-goto="2" data-i18n="back">← Indietro</button>
+      <button class="cta nav-adv" data-goto="4" data-i18n="next_scan" style="width:auto;margin:0">Vai allo scanner →</button>
+    </div>
+  </section>
+
+  <section class="tabpanel" data-panel="4" hidden>
+    <div class="step-head"><h2 data-i18n="step4">Verifica tecnica esterna</h2><span class="hint" data-i18n="hint4">superficie d'attacco esterna</span></div>
     <section class="card scan">
       <div class="scan-intro">
         <span class="demo-tag">Demo</span>
-        <p data-i18n-html="scan_intro">Inserisci un dominio: lo scanner analizza la <b>superficie esterna</b> (sicurezza email, TLS, header HTTP, porte esposte) e mostra le vulnerabilità visibili da fuori. È la controprova tecnica alle risposte dichiarate nell'autovalutazione — e il gancio gratuito da offrire ai potenziali clienti.</p>
+        <p data-i18n-html="scan_intro">Inserisci un dominio: NISafe analizza la <b>superficie esterna</b> pubblicamente visibile (sicurezza email, TLS, header HTTP, porte esposte) e ti mostra le vulnerabilità che un attaccante vedrebbe da fuori. <b>Questa è una dimostrazione</b>: i risultati sono generati a scopo illustrativo dal dominio inserito e <b>non sono reali</b>; nella versione completa i controlli vengono eseguiti realmente sull'infrastruttura, senza inviare dati sensibili a terzi.</p>
       </div>
       <div class="scan-form">
         <input type="text" id="domain" placeholder="es. azienda.it" data-i18n-ph="ph_domain" autocomplete="off" spellcheck="false">
@@ -553,7 +604,7 @@
       <div id="scanResult" hidden></div>
     </section>
     <div class="tabnav">
-      <button class="ghost-btn nav-adv" data-goto="2" data-i18n="back">← Indietro</button>
+      <button class="ghost-btn nav-adv" data-goto="3" data-i18n="back">← Indietro</button>
       <span></span>
     </div>
   </section>
@@ -698,9 +749,10 @@ const T = {
     gauge_h3:"Livello di conformità", gauge_cap0:"Rispondi per iniziare",
     cap_crit:"Livello critico — molti gap", cap_warn:"Livello parziale — margini di miglioramento", cap_good:"Buon livello di maturità",
     prog:"Completate <b>{a}</b> / {t} domande", genbtn:"Genera il gap report →",
-    tab1:"Ambito", tab2:"Autovalutazione", tab3:"Report e documenti", tab4:"Scanner",
-    next:"Avanti →", back:"← Indietro", next_scan:"Vai allo scanner →",
+    tab1:"Ambito", tab2:"Autovalutazione", tab3:"Report", tab4:"Documenti", tab5:"Scanner",
+    next:"Avanti →", back:"← Indietro", next_scan:"Vai allo scanner →", next_docs:"Vai ai documenti →",
     report_empty:"Completa l'autovalutazione nella scheda precedente e genera il gap report.",
+    docs_empty:"Genera prima il gap report, poi crea i documenti dalla scheda Report.",
     about_eyebrow:"Chi c'è dietro NISafe", about_role:"Founder",
     about_blurb:"Cybersecurity Engineer e penetration tester. NISafe nasce dalla parte offensiva: non solo checklist, ma la prova che le tue difese reggono davvero. Vuoi una demo per la tua azienda? Scrivimi.",
     hl1:"🚀 Riconoscimento dalla NASA", hl2:"🏅 2 CVE assegnate",
@@ -714,9 +766,9 @@ const T = {
     sev_critica:"critica", sev_alta:"alta", sev_media:"media", sev_bassa:"bassa",
     step3:"I tuoi documenti di conformità", hint3:"generati automaticamente",
     docintro:"Documenti precompilati sui dati e sulle risposte di <b id=\"docCompany\">la tua azienda</b>. <b>Puoi modificarli direttamente qui sotto</b>, poi copiarli o scaricarli. Nel prodotto finale il testo viene adattato dall'AI caso per caso. Da revisionare e far approvare dalla direzione prima dell'adozione.",
-    copy:"Copia", copied:"Copiato ✓", download:"Scarica",
-    step4:"Verifica tecnica esterna", hint4:"scanner · lead magnet",
-    scan_intro:"Inserisci un dominio: NISafe analizza la <b>superficie esterna</b> pubblicamente visibile (sicurezza email, TLS, header HTTP, porte esposte) e ti mostra le vulnerabilità che un attaccante vedrebbe da fuori. <b>Questa è una dimostrazione</b>: i risultati sono generati a scopo illustrativo dal dominio inserito; nella versione completa i controlli vengono eseguiti realmente sull'infrastruttura, senza inviare dati sensibili a terzi.",
+    copy:"Copia", copied:"Copiato ✓", download:"Scarica", doc_pdf:"⬇ Scarica PDF",
+    step4:"Verifica tecnica esterna", hint4:"superficie d'attacco esterna",
+    scan_intro:"Inserisci un dominio: NISafe analizza la <b>superficie esterna</b> pubblicamente visibile (sicurezza email, TLS, header HTTP, porte esposte) e ti mostra le vulnerabilità che un attaccante vedrebbe da fuori. <b>Questa è una dimostrazione</b>: i risultati sono generati a scopo illustrativo dal dominio inserito e <b>non sono reali</b>; nella versione completa i controlli vengono eseguiti realmente sull'infrastruttura, senza inviare dati sensibili a terzi.",
     scan_btn:"Analizza superficie →", ph_domain:"es. azienda.it",
     sc_score:"Punteggio esposizione", sc_crit:"Critici", sc_warn:"Da migliorare", sc_ok:"Conformi",
     fix_title:"Come risolvere", fix_do:"Fai", fix_dont:"Evita",
@@ -742,9 +794,10 @@ const T = {
     gauge_h3:"Compliance level", gauge_cap0:"Answer to begin",
     cap_crit:"Critical level — many gaps", cap_warn:"Partial level — room to improve", cap_good:"Good maturity level",
     prog:"Completed <b>{a}</b> / {t} questions", genbtn:"Generate the gap report →",
-    tab1:"Scope", tab2:"Self-assessment", tab3:"Report & documents", tab4:"Scanner",
-    next:"Next →", back:"← Back", next_scan:"Go to scanner →",
+    tab1:"Scope", tab2:"Self-assessment", tab3:"Report", tab4:"Documents", tab5:"Scanner",
+    next:"Next →", back:"← Back", next_scan:"Go to scanner →", next_docs:"Go to documents →",
     report_empty:"Complete the self-assessment in the previous tab and generate the gap report.",
+    docs_empty:"Generate the gap report first, then create the documents from the Report tab.",
     about_eyebrow:"Who's behind NISafe", about_role:"Founder",
     about_blurb:"Cybersecurity Engineer and penetration tester. NISafe comes from the offensive side: not just checklists, but proof that your defences really hold. Want a demo for your company? Get in touch.",
     hl1:"🚀 Recognition from NASA", hl2:"🏅 2 assigned CVEs",
@@ -758,9 +811,9 @@ const T = {
     sev_critica:"critical", sev_alta:"high", sev_media:"medium", sev_bassa:"low",
     step3:"Your compliance documents", hint3:"generated automatically",
     docintro:"Documents pre-filled with the data and answers of <b id=\"docCompany\">your company</b>. <b>You can edit them directly below</b>, then copy or download them. In the final product the text is tailored by AI case by case. To be reviewed and approved by management before adoption.",
-    copy:"Copy", copied:"Copied ✓", download:"Download",
-    step4:"External technical check", hint4:"scanner · lead magnet",
-    scan_intro:"Enter a domain: NISafe analyses the publicly <b>visible external surface</b> (email security, TLS, HTTP headers, exposed ports) and shows you the vulnerabilities an attacker would see from outside. <b>This is a demonstration</b>: results are generated for illustration from the domain entered; in the full version the checks run for real against the infrastructure, without sending sensitive data to third parties.",
+    copy:"Copy", copied:"Copied ✓", download:"Download", doc_pdf:"⬇ Download PDF",
+    step4:"External technical check", hint4:"external attack surface",
+    scan_intro:"Enter a domain: NISafe analyses the publicly <b>visible external surface</b> (email security, TLS, HTTP headers, exposed ports) and shows you the vulnerabilities an attacker would see from outside. <b>This is a demonstration</b>: results are generated for illustration from the domain entered and <b>are not real</b>; in the full version the checks run for real against the infrastructure, without sending sensitive data to third parties.",
     scan_btn:"Scan surface →", ph_domain:"e.g. company.com",
     sc_score:"Exposure score", sc_crit:"Critical", sc_warn:"To improve", sc_ok:"Compliant",
     fix_title:"How to fix", fix_do:"Do", fix_dont:"Avoid",
@@ -900,6 +953,23 @@ function sevOf(w,gap){ // gap: 1 (No) or .5 (Parziale)
   return 'bassa';
 }
 const SEV_ORDER={critica:0,alta:1,media:2,bassa:3};
+function applyReportFilter(rf, cell){
+  const stats=document.getElementById('stats');
+  stats.querySelectorAll('.rf-cell').forEach(x=>x.classList.toggle('active', x===cell));
+  const set = rf==='prio' ? ['critica','alta'] : rf==='media' ? ['media'] : null;
+  let any=false;
+  document.querySelectorAll('#road .task').forEach(t=>{
+    const show = !set || set.includes(t.dataset.sev);
+    t.style.display = show ? '' : 'none';
+    if(show) any=true;
+  });
+  const list=document.querySelector('#road .road-list');
+  if(list){
+    let em=document.getElementById('roadEmpty');
+    if(!any){ if(!em){ em=document.createElement('div'); em.id='roadEmpty'; em.className='findings-empty'; list.appendChild(em); } em.textContent=tr('sc_none'); em.hidden=false; }
+    else if(em){ em.hidden=true; }
+  }
+}
 function genReport(scroll){
   const tasks=[];
   MEASURES.forEach((m,mi)=>{
@@ -927,10 +997,10 @@ function genReport(scroll){
     .replace('{mode}', mode==='quick'?tr('mode_quick'):tr('mode_full'));
 
   document.getElementById('stats').innerHTML = `
-    <div class="stat c-${bucket(overall)}"><div class="sv">${overall}%</div><div class="sl">${tr('st_comp')}</div></div>
-    <div class="stat c-crit"><div class="sv">${counts.critica+counts.alta}</div><div class="sl">${tr('st_prio')}</div></div>
-    <div class="stat c-warn"><div class="sv">${counts.media}</div><div class="sl">${tr('st_med')}</div></div>
-    <div class="stat c-good"><div class="sv">${tasks.length}</div><div class="sl">${tr('st_gaps')}</div></div>`;
+    <div class="stat rf-cell active c-${bucket(overall)}" data-rf="all" role="button" tabindex="0"><div class="sv">${overall}%</div><div class="sl">${tr('st_comp')}</div></div>
+    <div class="stat rf-cell c-crit" data-rf="prio" role="button" tabindex="0"><div class="sv">${counts.critica+counts.alta}</div><div class="sl">${tr('st_prio')}</div></div>
+    <div class="stat rf-cell c-warn" data-rf="media" role="button" tabindex="0"><div class="sv">${counts.media}</div><div class="sl">${tr('st_med')}</div></div>
+    <div class="stat rf-cell c-good" data-rf="all" role="button" tabindex="0"><div class="sv">${tasks.length}</div><div class="sl">${tr('st_gaps')}</div></div>`;
 
   const road=document.getElementById('road');
   if(tasks.length===0){
@@ -939,15 +1009,22 @@ function genReport(scroll){
     road.innerHTML = `
       <h3>${tr('road_h')}</h3>
       <p class="sub">${tr('road_sub')}</p>
+      <div class="road-list">
       ${tasks.map(t=>`
-        <div class="task">
+        <div class="task" data-sev="${t.sev}">
           <span class="sev ${t.sev}">${tr('sev_'+t.sev)}</span>
           <div class="tbody">
             <div class="tmeta">${t.area}</div>
             <b>${t.action}</b>
           </div>
-        </div>`).join('')}`;
+        </div>`).join('')}
+      </div>`;
   }
+  document.getElementById('stats').querySelectorAll('.rf-cell').forEach(c=>{
+    const act=()=>applyReportFilter(c.dataset.rf,c);
+    c.addEventListener('click',act);
+    c.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+  });
   const rep=document.getElementById('report');
   rep.hidden=false;
   const empty=document.getElementById('reportEmpty'); if(empty) empty.hidden=true;
@@ -1008,50 +1085,22 @@ function stateLine(mi){
   return 'Stato attuale: misura PARZIALMENTE implementata. Questo documento definisce lo standard completo da consolidare.';
 }
 function head(p,title,ref,code){
-  const bar='═'.repeat(58);
-  if(lang==='en'){
-    return `${bar}\n${p.name.toUpperCase()}\n${title}\n${bar}\n`+
-`Document:        ${code}
-Version:         1.0
-Issue date:      ${p.date}
-Next review:     within 12 months of the issue date
-Legal reference: ${ref}
-National framework: Legislative Decree 138/2024 (NIS2 transposition, Italy)
-Entity classification (indicative): ${p.entity}
-Profile: ${p.sectorLabel} — ${p.sizeLabel}
-Document owner: ____________________  (Security officer)
-Approved by (management body, NIS2 Art. 20): ____________________
-Signature and approval date: ____________________
-${bar}\n\n`;
-  }
-  return `${bar}\n${p.name.toUpperCase()}\n${title}\n${bar}\n`+
-`Documento:      ${code}
-Versione:       1.0
-Data emissione: ${p.date}
-Prossimo riesame: entro 12 mesi dalla data di emissione
-Riferimento normativo: ${ref}
-Quadro nazionale:      D.Lgs. 138/2024 (recepimento NIS2)
-Classificazione entità (indicativa): ${p.entity}
-Profilo: ${p.sectorLabel} — ${p.sizeLabel}
-Responsabile del documento: ____________________  (Referente sicurezza)
-Approvato da (organo di gestione, art. 20 NIS2): ____________________
-Firma e data approvazione: ____________________
-${bar}\n\n`;
+  const en = lang==='en';
+  const rows = [
+    ['_title', title],
+    ['_company', p.name],
+    [en?'Document':'Documento', code],
+    [en?'Version':'Versione', '1.0'],
+    [en?'Issue date':'Data di emissione', p.date],
+    [en?'Next review':'Prossimo riesame', en?'within 12 months':'entro 12 mesi'],
+    [en?'Legal reference':'Riferimento normativo', ref],
+    [en?'National framework':'Quadro nazionale', 'D.Lgs. 138/2024'],
+    [en?'Entity (indicative)':'Entità (indicativa)', p.entity],
+    [en?'Profile':'Profilo', p.sectorLabel+' — '+p.sizeLabel],
+  ];
+  return rows.map(r=>r[0]+'\t'+r[1]).join('\n')+'\n---NISAFE-BODY---\n';
 }
-function foot(){
-  if(lang==='en'){
-    return `\n\n${'─'.repeat(58)}
-Document automatically generated as a NIS2-compliant draft.
-It must be reviewed, adapted to the company's reality and approved by the
-management body before adoption. It does not constitute legal advice.
-Revision history: v1.0 — initial issue.`;
-  }
-  return `\n\n${'─'.repeat(58)}
-Documento generato automaticamente come bozza conforme alla NIS2.
-Va riletto, adattato alla realtà aziendale e approvato dall'organo di
-gestione prima dell'adozione. Non costituisce consulenza legale.
-Registro delle revisioni: v1.0 — emissione iniziale.`;
-}
+function foot(){ return ''; }
 function buildDocs(p){
   if(lang==='en') return buildDocsEN(p);
   return [
@@ -1407,37 +1456,91 @@ ${stateLine(8)}
 The policy is reviewed at least annually and at every relevant organisational change.`+foot()},
   ];
 }
-function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+const SHIELD_SVG='<svg viewBox="0 0 24 24" fill="none"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3Z" fill="#fff" opacity=".95"/><path d="m8.5 12 2.4 2.4L15.8 9" stroke="#2E56E6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function fmtSections(text){
+  const lines=(text||'').split('\n'); let out=''; let inList=false;
+  const close=()=>{ if(inList){ out+='</ul>'; inList=false; } };
+  for(const raw of lines){
+    const t=raw.trim();
+    if(!t){ close(); continue; }
+    const letters=t.replace(/[^A-Za-zÀ-ÿ]/g,'');
+    if(/^\d+\.\s+/.test(t) && letters && letters===letters.toUpperCase()){
+      close(); out+='<h3>'+escapeHtml(t)+'</h3>'; continue;
+    }
+    if(/^-\s+/.test(t) || /^[a-z]\)\s+/.test(t)){
+      if(!inList){ out+='<ul>'; inList=true; }
+      out+='<li>'+escapeHtml(t.replace(/^-\s+/,''))+'</li>'; continue;
+    }
+    close(); out+='<p>'+escapeHtml(t)+'</p>';
+  }
+  close();
+  return out;
+}
 let DOCS=[];
 function genDocs(scroll){
   const p=getProfile();
   DOCS=buildDocs(p);
+  const en=lang==='en';
+  const signLabels = en ? ['Document owner','Approved by (management body, Art. 20)','Signature & date']
+                        : ['Responsabile del documento','Approvato da (organo di gestione, art. 20)','Firma e data'];
+  const footnote = en
+    ? "Draft automatically generated by NISafe as a NIS2-compliant document. To be reviewed, adapted and approved by the management body before adoption. Not legal advice."
+    : "Bozza generata automaticamente da NISafe come documento conforme alla NIS2. Da rileggere, adattare e far approvare dall'organo di gestione prima dell'adozione. Non costituisce consulenza legale.";
   document.getElementById('docCompany').textContent=p.name;
-  document.getElementById('docList').innerHTML=DOCS.map((d,i)=>`
+  document.getElementById('docList').innerHTML=DOCS.map((d,i)=>{
+    const parts=d.body.split('---NISAFE-BODY---');
+    const rows=parts[0].trim().split('\n').map(l=>l.split('\t'));
+    const title=(rows.find(r=>r[0]==='_title')||[])[1]||d.title;
+    const company=(rows.find(r=>r[0]==='_company')||[])[1]||p.name;
+    const codeRow=rows.find(r=>r[0]==='Documento'||r[0]==='Document');
+    const code=codeRow?codeRow[1]:'';
+    const meta=rows.filter(r=>r[0]!=='_title'&&r[0]!=='_company'&&r!==codeRow);
+    return `
     <div class="doc-item">
       <div class="doc-h">
         <span class="doc-ico" aria-hidden="true">${d.ico}</span>
-        <div class="doc-meta"><b>${d.title}</b><small>${d.art}</small></div>
+        <div class="doc-meta"><b>${escapeHtml(d.title)}</b><small>${escapeHtml(d.art)}</small></div>
+        <button class="doc-btn primary" data-pdf="${i}">${tr('doc_pdf')}</button>
         <button class="doc-btn" data-copy="${i}">${tr('copy')}</button>
-        <button class="doc-btn" data-dl="${i}">${tr('download')}</button>
       </div>
-      <textarea class="doc-edit" id="doctext-${i}" spellcheck="false" aria-label="Contenuto del documento, modificabile">${escapeHtml(d.body)}</textarea>
-    </div>`).join('');
+      <div class="doc-page" id="docpage-${i}" contenteditable="true" spellcheck="false">
+        <div class="dp-head">
+          <div class="dp-brand"><span class="dp-mark">${SHIELD_SVG}</span>NISafe</div>
+          <div class="dp-code">${escapeHtml(code)}</div>
+        </div>
+        <h1 class="dp-title">${escapeHtml(title)}</h1>
+        <div class="dp-company">${escapeHtml(company)}</div>
+        <table class="dp-meta"><tbody>${meta.map(r=>`<tr><td>${escapeHtml(r[0])}</td><td>${escapeHtml(r[1]||'')}</td></tr>`).join('')}</tbody></table>
+        <div class="dp-body">${fmtSections(parts[1])}</div>
+        <div class="dp-sign">${signLabels.map(s=>`<div class="dp-sign-row"><span>${escapeHtml(s)}</span><span class="dp-line"></span></div>`).join('')}</div>
+        <div class="dp-foot">${escapeHtml(footnote)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('docsEmpty').hidden=true;
   document.getElementById('docStep').hidden=false;
   document.getElementById('docs').hidden=false;
   updateTabStates();
   saveState();
   if(scroll!==false) document.getElementById('docStep').scrollIntoView({behavior:'smooth',block:'start'});
 }
-document.getElementById('docGenBtn').addEventListener('click',()=>genDocs(true));
+function printDoc(i){
+  const pages=document.querySelectorAll('.doc-page');
+  pages.forEach((pg,idx)=>pg.classList.toggle('printing', idx===i));
+  document.body.classList.add('printing-doc');
+  window.print();
+}
+window.addEventListener('afterprint',()=>{
+  document.body.classList.remove('printing-doc');
+  document.querySelectorAll('.doc-page.printing').forEach(pg=>pg.classList.remove('printing'));
+});
+document.getElementById('docGenBtn').addEventListener('click',()=>{ genDocs(false); showTab(3); });
 document.getElementById('docList').addEventListener('click',e=>{
-  const cp=e.target.closest('[data-copy]'), dl=e.target.closest('[data-dl]');
-  if(cp){ const ta=document.getElementById('doctext-'+cp.dataset.copy); navigator.clipboard?.writeText(ta.value);
+  const cp=e.target.closest('[data-copy]'), pd=e.target.closest('[data-pdf]');
+  if(cp){ const el=document.getElementById('docpage-'+cp.dataset.copy); navigator.clipboard?.writeText(el.innerText);
     cp.textContent=tr('copied'); setTimeout(()=>cp.textContent=tr('copy'),1500); }
-  if(dl){ const i=+dl.dataset.dl; const ta=document.getElementById('doctext-'+i);
-    const url=URL.createObjectURL(new Blob([ta.value],{type:'text/plain;charset=utf-8'}));
-    const a=document.createElement('a'); a.href=url; a.download=DOCS[i].file; document.body.appendChild(a); a.click();
-    a.remove(); URL.revokeObjectURL(url); }
+  if(pd){ printDoc(+pd.dataset.pdf); }
 });
 
 // ---- external scanner (demo) ----
@@ -1583,6 +1686,7 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   document.getElementById('reportEmpty').hidden=false;
   document.getElementById('docStep').hidden=true;
   document.getElementById('docs').hidden=true;
+  document.getElementById('docsEmpty').hidden=false;
   document.getElementById('domain').value='';
   document.getElementById('scanResult').hidden=true;
   recompute();
@@ -1600,9 +1704,14 @@ function showTab(i){
 }
 function updateTabStates(){
   const t=document.querySelectorAll('.tab');
+  const rep=!document.getElementById('report').hidden;
+  const dc=!document.getElementById('docs').hidden;
+  const sc=!document.getElementById('scanResult').hidden;
   if(t[0]) t[0].classList.toggle('done', !!(sectorSel.value && sizeSel.value));
-  if(t[1]) t[1].classList.toggle('done', !document.getElementById('report').hidden);
-  if(t[2]) t[2].classList.toggle('done', !document.getElementById('docs').hidden);
+  if(t[1]) t[1].classList.toggle('done', rep);
+  if(t[2]) t[2].classList.toggle('done', rep);
+  if(t[3]) t[3].classList.toggle('done', dc);
+  if(t[4]) t[4].classList.toggle('done', sc);
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showTab(+t.dataset.tab)));
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showTab(+b.dataset.goto)));
