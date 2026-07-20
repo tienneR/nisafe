@@ -65,6 +65,10 @@
     color:#fff;background:linear-gradient(150deg,var(--accent),var(--accent-ink));box-shadow:var(--shadow);transition:.15s;}
   .nav-cta:hover{filter:brightness(1.07);transform:translateY(-1px);}
   @media (max-width:520px){.nav-cta{display:none;}}
+  .lang-switch{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-right:12px;}
+  .lang-btn{font:inherit;font-size:.75rem;font-weight:700;padding:6px 11px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.14s;}
+  .lang-btn:hover{color:var(--text);}
+  .lang-btn.active{background:var(--accent);color:#fff;}
 
   /* Hero */
   .hero{position:relative;padding:72px 0 40px;overflow:hidden;isolation:isolate;}
@@ -174,92 +178,96 @@
       NISafe
     </div>
     <div class="nav-spacer"></div>
-    <a class="nav-cta" href="demo.html">Prova la demo</a>
+    <div class="lang-switch" role="group" aria-label="Lingua / Language">
+      <button class="lang-btn active" data-lang="it" type="button">IT</button>
+      <button class="lang-btn" data-lang="en" type="button">EN</button>
+    </div>
+    <a class="nav-cta" href="demo.html" data-i18n="nav_cta">Prova la demo</a>
   </div>
 </header>
 
 <div class="wrap">
   <section class="hero">
     <div class="hero-glow" aria-hidden="true"></div>
-    <div class="eyebrow">Conformità NIS2 · per le PMI</div>
-    <h1>Metti in regola la tua azienda con la <span class="hl">NIS2</span>. Da solo.</h1>
-    <p class="lead">Niente consulenze da decine di migliaia di euro. NISafe ti guida passo passo: scopri se la NIS2 ti riguarda, valuta la tua sicurezza e ottieni <strong>report e documenti pronti</strong>. In 5 minuti.</p>
+    <div class="eyebrow" data-i18n="eyebrow">Conformità NIS2 · per le PMI</div>
+    <h1 data-i18n-html="h1">Metti in regola la tua azienda con la <span class="hl">NIS2</span>. In autonomia.</h1>
+    <p class="lead" data-i18n-html="lead">Niente consulenze da decine di migliaia di euro. NISafe ti guida passo passo: scopri se la NIS2 ti riguarda, valuta la tua sicurezza e ottieni <strong>report e documenti pronti</strong>. In 5 minuti.</p>
     <div class="cta-row">
-      <a class="btn primary" href="demo.html">Prova la demo gratis →</a>
-      <a class="btn ghost" href="mailto:lorenzorusso2911@gmail.com">Parla con me</a>
+      <a class="btn primary" href="demo.html" data-i18n="btn_try">Prova la demo gratis →</a>
+      <a class="btn ghost" href="mailto:lorenzorusso2911@gmail.com" data-i18n="btn_talk">Parla con me</a>
     </div>
     <div class="trust">
-      <span><span class="tk">✓</span> 80% del percorso in autonomia</span>
-      <span><span class="tk">✓</span> Senza consulenze costose</span>
-      <span><span class="tk">✓</span> Report e documenti in 5 minuti</span>
+      <span><span class="tk">✓</span> <span data-i18n="trust1">80% del percorso in autonomia</span></span>
+      <span><span class="tk">✓</span> <span data-i18n="trust2">Senza consulenze costose</span></span>
+      <span><span class="tk">✓</span> <span data-i18n="trust3">Report e documenti in 5 minuti</span></span>
     </div>
   </section>
 
   <section class="sec" id="problema">
-    <div class="sec-eyebrow">Il problema</div>
-    <h2>La NIS2 non è un'opzione.</h2>
-    <p class="sub">La direttiva europea NIS2 (recepita in Italia con il D.Lgs. 138/2024) obbliga migliaia di aziende "essenziali" e "importanti" ad alzare il livello di sicurezza — spesso senza sapere da dove iniziare.</p>
+    <div class="sec-eyebrow" data-i18n="pr_eyebrow">Il problema</div>
+    <h2 data-i18n="pr_h2">La NIS2 non è un'opzione.</h2>
+    <p class="sub" data-i18n="pr_sub">La direttiva europea NIS2 (recepita in Italia con il D.Lgs. 138/2024) obbliga migliaia di aziende "essenziali" e "importanti" ad alzare il livello di sicurezza — spesso senza sapere da dove iniziare.</p>
     <div class="grid3">
       <div class="card">
         <div class="ico" aria-hidden="true">⚖️</div>
-        <h3>È un obbligo di legge</h3>
-        <p>Se operi in un settore critico (manifatturiero, energia, sanità, ICT, alimentare…) con almeno 50 dipendenti, la NIS2 con ogni probabilità ti riguarda.</p>
+        <h3 data-i18n="pr_c1_h">È un obbligo di legge</h3>
+        <p data-i18n="pr_c1_p">Se operi in un settore critico (manifatturiero, energia, sanità, ICT, alimentare…) con almeno 50 dipendenti, la NIS2 con ogni probabilità ti riguarda.</p>
       </div>
       <div class="card">
         <div class="ico" aria-hidden="true">⏱️</div>
-        <h3>Scadenze strette</h3>
-        <p>In caso di incidente devi notificare all'autorità entro <strong>24 e 72 ore</strong>. Senza procedure pronte, è impossibile rispettarle.</p>
+        <h3 data-i18n="pr_c2_h">Scadenze strette</h3>
+        <p data-i18n-html="pr_c2_p">In caso di incidente devi notificare all'autorità entro <strong>24 e 72 ore</strong>. Senza procedure pronte, è impossibile rispettarle.</p>
       </div>
       <div class="card">
         <div class="ico" aria-hidden="true">🚨</div>
-        <h3>Sanzioni e responsabilità</h3>
-        <p>Le multe sono pesanti e la responsabilità ricade direttamente sull'organo di gestione dell'azienda. Non è un problema solo dell'IT.</p>
+        <h3 data-i18n="pr_c3_h">Sanzioni e responsabilità</h3>
+        <p data-i18n="pr_c3_p">Le multe sono pesanti e la responsabilità ricade direttamente sull'organo di gestione dell'azienda. Non è un problema solo dell'IT.</p>
       </div>
     </div>
   </section>
 
   <section class="sec" id="come-funziona">
-    <div class="sec-eyebrow">Come funziona</div>
-    <h2>Dalla domanda "mi riguarda?" ai documenti pronti.</h2>
-    <p class="sub">Quattro passi guidati, tutto in autonomia. Nessun linguaggio da esperti.</p>
+    <div class="sec-eyebrow" data-i18n="cf_eyebrow">Come funziona</div>
+    <h2 data-i18n="cf_h2">Dalla domanda "mi riguarda?" ai documenti pronti.</h2>
+    <p class="sub" data-i18n="cf_sub">Quattro passi guidati, tutto in autonomia. Nessun linguaggio da esperti.</p>
     <div class="steps">
-      <div class="step"><div class="num">01</div><h3>Verifica l'ambito</h3><p>Scopri in un attimo se la NIS2 si applica a te e come sei classificato.</p></div>
-      <div class="step"><div class="num">02</div><h3>Autovalutazione</h3><p>Rispondi alle domande sulle misure dell'art. 21 e vedi il tuo livello di conformità.</p></div>
-      <div class="step"><div class="num">03</div><h3>Report e documenti</h3><p>Ricevi una roadmap prioritizzata e i documenti di conformità pronti da adottare.</p></div>
-      <div class="step"><div class="num">04</div><h3>Scanner esterno</h3><p>Controlla la superficie d'attacco del tuo dominio e scopri come sistemare i problemi.</p></div>
+      <div class="step"><div class="num">01</div><h3 data-i18n="st1_h">Verifica l'ambito</h3><p data-i18n="st1_p">Scopri in un attimo se la NIS2 si applica a te e come sei classificato.</p></div>
+      <div class="step"><div class="num">02</div><h3 data-i18n="st2_h">Autovalutazione</h3><p data-i18n="st2_p">Rispondi alle domande sulle misure dell'art. 21 e vedi il tuo livello di conformità.</p></div>
+      <div class="step"><div class="num">03</div><h3 data-i18n="st3_h">Report e documenti</h3><p data-i18n="st3_p">Ricevi una roadmap prioritizzata e i documenti di conformità pronti da adottare.</p></div>
+      <div class="step"><div class="num">04</div><h3 data-i18n="st4_h">Scanner esterno</h3><p data-i18n="st4_p">Controlla la superficie d'attacco del tuo dominio e scopri come sistemare i problemi.</p></div>
     </div>
   </section>
 
   <section class="sec" id="cosa-ottieni">
-    <div class="sec-eyebrow">Cosa ottieni</div>
-    <h2>Tutto ciò che serve, senza consulenze.</h2>
+    <div class="sec-eyebrow" data-i18n="co_eyebrow">Cosa ottieni</div>
+    <h2 data-i18n="co_h2">Tutto ciò che serve, senza consulenze.</h2>
     <div class="feat">
-      <div class="feat-item"><span class="ck">✓</span><div><b>Gap report prioritizzato</b><p>Vedi esattamente cosa ti manca e in che ordine intervenire, con riferimento agli articoli.</p></div></div>
-      <div class="feat-item"><span class="ck">✓</span><div><b>Documenti di conformità</b><p>Policy di sicurezza, procedura incidenti, piano di continuità e controllo accessi — modificabili.</p></div></div>
-      <div class="feat-item"><span class="ck">✓</span><div><b>Scanner con guida ai rimedi</b><p>Email, TLS, header, porte esposte: per ogni problema, cosa fare e cosa evitare.</p></div></div>
-      <div class="feat-item"><span class="ck">✓</span><div><b>In autonomia, IT ed EN</b><p>Interfaccia semplice, salvataggio dei progressi, disponibile in italiano e inglese.</p></div></div>
+      <div class="feat-item"><span class="ck">✓</span><div><b data-i18n="f1_b">Gap report prioritizzato</b><p data-i18n="f1_p">Vedi esattamente cosa ti manca e in che ordine intervenire, con riferimento agli articoli.</p></div></div>
+      <div class="feat-item"><span class="ck">✓</span><div><b data-i18n="f2_b">Documenti di conformità</b><p data-i18n="f2_p">Policy di sicurezza, procedura incidenti, piano di continuità e controllo accessi — modificabili.</p></div></div>
+      <div class="feat-item"><span class="ck">✓</span><div><b data-i18n="f3_b">Scanner con guida ai rimedi</b><p data-i18n="f3_p">Email, TLS, header, porte esposte: per ogni problema, cosa fare e cosa evitare.</p></div></div>
+      <div class="feat-item"><span class="ck">✓</span><div><b data-i18n="f4_b">In autonomia, IT ed EN</b><p data-i18n="f4_p">Interfaccia semplice, salvataggio dei progressi, disponibile in italiano e inglese.</p></div></div>
     </div>
   </section>
 
   <section class="sec" id="perche">
     <div class="band">
-      <div class="sec-eyebrow">Perché NISafe</div>
-      <h2>Uno scanner pensato da chi attacca davvero.</h2>
-      <p>Gli altri ti danno una checklist da compilare, o un tool generico rivenduto a scatola chiusa. Lo scanner di NISafe è progettato da un penetration tester che buca i sistemi per lavoro — con <strong>CVE pubblicate</strong> e un <strong>riconoscimento dalla NASA</strong>. Sa cosa cerca un attaccante reale, non solo cosa dice una checklist. È la differenza tra "sembrare a posto" ed "esserlo".</p>
+      <div class="sec-eyebrow" data-i18n="pe_eyebrow">Perché NISafe</div>
+      <h2 data-i18n="pe_h2">Uno scanner pensato da chi attacca davvero.</h2>
+      <p data-i18n-html="pe_p">Gli altri ti danno una checklist da compilare, o un tool generico rivenduto a scatola chiusa. Lo scanner di NISafe è progettato da un penetration tester che buca i sistemi per lavoro — con <strong>CVE pubblicate</strong> e un <strong>riconoscimento dalla NASA</strong>. Sa cosa cerca un attaccante reale, non solo cosa dice una checklist. È la differenza tra "sembrare a posto" ed "esserlo".</p>
     </div>
   </section>
 
   <section class="sec" id="chi">
-    <div class="sec-eyebrow">Chi c'è dietro</div>
-    <h2>Una persona, non un call center.</h2>
+    <div class="sec-eyebrow" data-i18n="ch_eyebrow">Chi c'è dietro</div>
+    <h2 data-i18n="ch_h2">Una persona, non un call center.</h2>
     <div class="founder">
       <div class="founder-av" aria-hidden="true">LR</div>
       <div class="founder-body">
-        <div class="founder-name">Lorenzo Russo <span class="founder-role">Founder</span></div>
-        <p>Cybersecurity Engineer e penetration tester. NISafe nasce dalla mia esperienza sul campo: hai domande o vuoi una demo per la tua azienda? Scrivimi, rispondo io.</p>
+        <div class="founder-name">Lorenzo Russo <span class="founder-role" data-i18n="founder_role">Founder</span></div>
+        <p data-i18n="ch_p">Cybersecurity Engineer e penetration tester. NISafe nasce dalla mia esperienza sul campo: hai domande o vuoi una demo per la tua azienda? Scrivimi, rispondo io.</p>
         <div class="badges">
-          <span class="badge">🚀 Riconoscimento dalla NASA</span>
-          <span class="badge">🏅 2 CVE assegnate</span>
+          <span class="badge" data-i18n="badge1">🚀 Riconoscimento dalla NASA</span>
+          <span class="badge" data-i18n="badge2">🏅 2 CVE assegnate</span>
         </div>
         <div class="founder-links">
           <a class="flink" href="mailto:lorenzorusso2911@gmail.com">✉&nbsp; Email</a>
@@ -270,11 +278,11 @@
   </section>
 
   <section class="final">
-    <h2>Scopri a che punto sei con la NIS2.</h2>
-    <p>Provalo adesso — gratis, senza registrazione, in 5 minuti.</p>
+    <h2 data-i18n="fn_h2">Scopri a che punto sei con la NIS2.</h2>
+    <p data-i18n="fn_p">Provalo adesso — gratis, senza registrazione, in 5 minuti.</p>
     <div class="cta-row" style="justify-content:center">
-      <a class="btn primary" href="demo.html">Prova la demo gratis →</a>
-      <a class="btn ghost" href="mailto:lorenzorusso2911@gmail.com">Contattami</a>
+      <a class="btn primary" href="demo.html" data-i18n="btn_try">Prova la demo gratis →</a>
+      <a class="btn ghost" href="mailto:lorenzorusso2911@gmail.com" data-i18n="btn_contact">Contattami</a>
     </div>
   </section>
 </div>
@@ -287,7 +295,81 @@
       <a href="https://www.linkedin.com/in/lorenzo-russo00/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
-  <div class="wrap"><p class="disc">NISafe è uno strumento di supporto alla conformità e non costituisce consulenza legale né garanzia di conformità. L'ambito di applicazione e la classificazione dell'entità vanno verificati con l'autorità competente (in Italia, ACN). La responsabilità della conformità resta in capo all'organizzazione.</p></div>
+  <div class="wrap"><p class="disc" data-i18n="disc">NISafe è uno strumento di supporto alla conformità e non costituisce consulenza legale né garanzia di conformità. L'ambito di applicazione e la classificazione dell'entità vanno verificati con l'autorità competente (in Italia, ACN). La responsabilità della conformità resta in capo all'organizzazione.</p></div>
 </footer>
+
+<script>
+const T = {
+  it:{
+    nav_cta:"Prova la demo",
+    eyebrow:"Conformità NIS2 · per le PMI",
+    h1:"Metti in regola la tua azienda con la <span class=\"hl\">NIS2</span>. In autonomia.",
+    lead:"Niente consulenze da decine di migliaia di euro. NISafe ti guida passo passo: scopri se la NIS2 ti riguarda, valuta la tua sicurezza e ottieni <strong>report e documenti pronti</strong>. In 5 minuti.",
+    btn_try:"Prova la demo gratis →", btn_talk:"Parla con me", btn_contact:"Contattami",
+    trust1:"80% del percorso in autonomia", trust2:"Senza consulenze costose", trust3:"Report e documenti in 5 minuti",
+    pr_eyebrow:"Il problema", pr_h2:"La NIS2 non è un'opzione.",
+    pr_sub:"La direttiva europea NIS2 (recepita in Italia con il D.Lgs. 138/2024) obbliga migliaia di aziende \"essenziali\" e \"importanti\" ad alzare il livello di sicurezza — spesso senza sapere da dove iniziare.",
+    pr_c1_h:"È un obbligo di legge", pr_c1_p:"Se operi in un settore critico (manifatturiero, energia, sanità, ICT, alimentare…) con almeno 50 dipendenti, la NIS2 con ogni probabilità ti riguarda.",
+    pr_c2_h:"Scadenze strette", pr_c2_p:"In caso di incidente devi notificare all'autorità entro <strong>24 e 72 ore</strong>. Senza procedure pronte, è impossibile rispettarle.",
+    pr_c3_h:"Sanzioni e responsabilità", pr_c3_p:"Le multe sono pesanti e la responsabilità ricade direttamente sull'organo di gestione dell'azienda. Non è un problema solo dell'IT.",
+    cf_eyebrow:"Come funziona", cf_h2:"Dalla domanda \"mi riguarda?\" ai documenti pronti.", cf_sub:"Quattro passi guidati, tutto in autonomia. Nessun linguaggio da esperti.",
+    st1_h:"Verifica l'ambito", st1_p:"Scopri in un attimo se la NIS2 si applica a te e come sei classificato.",
+    st2_h:"Autovalutazione", st2_p:"Rispondi alle domande sulle misure dell'art. 21 e vedi il tuo livello di conformità.",
+    st3_h:"Report e documenti", st3_p:"Ricevi una roadmap prioritizzata e i documenti di conformità pronti da adottare.",
+    st4_h:"Scanner esterno", st4_p:"Controlla la superficie d'attacco del tuo dominio e scopri come sistemare i problemi.",
+    co_eyebrow:"Cosa ottieni", co_h2:"Tutto ciò che serve, senza consulenze.",
+    f1_b:"Gap report prioritizzato", f1_p:"Vedi esattamente cosa ti manca e in che ordine intervenire, con riferimento agli articoli.",
+    f2_b:"Documenti di conformità", f2_p:"Policy di sicurezza, procedura incidenti, piano di continuità e controllo accessi — modificabili.",
+    f3_b:"Scanner con guida ai rimedi", f3_p:"Email, TLS, header, porte esposte: per ogni problema, cosa fare e cosa evitare.",
+    f4_b:"In autonomia, IT ed EN", f4_p:"Interfaccia semplice, salvataggio dei progressi, disponibile in italiano e inglese.",
+    pe_eyebrow:"Perché NISafe", pe_h2:"Uno scanner pensato da chi attacca davvero.",
+    pe_p:"Gli altri ti danno una checklist da compilare, o un tool generico rivenduto a scatola chiusa. Lo scanner di NISafe è progettato da un penetration tester che buca i sistemi per lavoro — con <strong>CVE pubblicate</strong> e un <strong>riconoscimento dalla NASA</strong>. Sa cosa cerca un attaccante reale, non solo cosa dice una checklist. È la differenza tra \"sembrare a posto\" ed \"esserlo\".",
+    ch_eyebrow:"Chi c'è dietro", ch_h2:"Una persona, non un call center.", founder_role:"Founder",
+    ch_p:"Cybersecurity Engineer e penetration tester. NISafe nasce dalla mia esperienza sul campo: hai domande o vuoi una demo per la tua azienda? Scrivimi, rispondo io.",
+    badge1:"🚀 Riconoscimento dalla NASA", badge2:"🏅 2 CVE assegnate",
+    fn_h2:"Scopri a che punto sei con la NIS2.", fn_p:"Provalo adesso — gratis, senza registrazione, in 5 minuti.",
+    disc:"NISafe è uno strumento di supporto alla conformità e non costituisce consulenza legale né garanzia di conformità. L'ambito di applicazione e la classificazione dell'entità vanno verificati con l'autorità competente (in Italia, ACN). La responsabilità della conformità resta in capo all'organizzazione."
+  },
+  en:{
+    nav_cta:"Try the demo",
+    eyebrow:"NIS2 compliance · for SMEs",
+    h1:"Get your company <span class=\"hl\">NIS2</span>-ready. In-house.",
+    lead:"No consulting fees in the tens of thousands. NISafe guides you step by step: find out if NIS2 applies to you, assess your security and get <strong>ready-to-use reports and documents</strong>. In 5 minutes.",
+    btn_try:"Try the demo free →", btn_talk:"Talk to me", btn_contact:"Contact me",
+    trust1:"80% of the journey on your own", trust2:"No expensive consultants", trust3:"Report and documents in 5 minutes",
+    pr_eyebrow:"The problem", pr_h2:"NIS2 is not optional.",
+    pr_sub:"The EU NIS2 directive (transposed in Italy by Legislative Decree 138/2024) requires thousands of \"essential\" and \"important\" companies to raise their security level — often without knowing where to start.",
+    pr_c1_h:"It's a legal obligation", pr_c1_p:"If you operate in a critical sector (manufacturing, energy, healthcare, ICT, food…) with at least 50 employees, NIS2 most likely applies to you.",
+    pr_c2_h:"Tight deadlines", pr_c2_p:"In case of an incident you must notify the authority within <strong>24 and 72 hours</strong>. Without procedures in place, meeting them is impossible.",
+    pr_c3_h:"Penalties and liability", pr_c3_p:"Fines are heavy and liability falls directly on the company's management body. It's not just an IT problem.",
+    cf_eyebrow:"How it works", cf_h2:"From \"does it apply to me?\" to ready documents.", cf_sub:"Four guided steps, all on your own. No expert jargon.",
+    st1_h:"Check the scope", st1_p:"Find out in a moment if NIS2 applies to you and how you're classified.",
+    st2_h:"Self-assessment", st2_p:"Answer the questions on the Article 21 measures and see your compliance level.",
+    st3_h:"Report and documents", st3_p:"Get a prioritised roadmap and compliance documents ready to adopt.",
+    st4_h:"External scanner", st4_p:"Check your domain's attack surface and find out how to fix the issues.",
+    co_eyebrow:"What you get", co_h2:"Everything you need, without consultants.",
+    f1_b:"Prioritised gap report", f1_p:"See exactly what you're missing and in what order to act, with article references.",
+    f2_b:"Compliance documents", f2_p:"Security policy, incident procedure, continuity plan and access control — editable.",
+    f3_b:"Scanner with remediation guidance", f3_p:"Email, TLS, headers, exposed ports: for each issue, what to do and what to avoid.",
+    f4_b:"On your own, IT & EN", f4_p:"Simple interface, progress saving, available in Italian and English.",
+    pe_eyebrow:"Why NISafe", pe_h2:"A scanner designed by someone who really attacks.",
+    pe_p:"Others give you a checklist to fill in, or a generic tool resold sight unseen. NISafe's scanner is designed by a penetration tester who breaks into systems for a living — with <strong>published CVEs</strong> and a <strong>recognition from NASA</strong>. It knows what a real attacker looks for, not just what a checklist says. It's the difference between \"looking compliant\" and \"being compliant\".",
+    ch_eyebrow:"Who's behind it", ch_h2:"A person, not a call center.", founder_role:"Founder",
+    ch_p:"Cybersecurity Engineer and penetration tester. NISafe was born from my field experience: questions, or want a demo for your company? Write to me — I answer personally.",
+    badge1:"🚀 Recognition from NASA", badge2:"🏅 2 assigned CVEs",
+    fn_h2:"Find out where you stand with NIS2.", fn_p:"Try it now — free, no sign-up, in 5 minutes.",
+    disc:"NISafe is a compliance-support tool and does not constitute legal advice or a guarantee of compliance. The scope of application and the entity classification must be verified with the competent authority (in Italy, ACN). Responsibility for compliance remains with the organisation."
+  }
+};
+let lang = 'it';
+function applyLang(){
+  document.documentElement.lang = lang;
+  const d = T[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.getAttribute('data-i18n'); if(d[k]!==undefined) el.textContent=d[k]; });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{ const k=el.getAttribute('data-i18n-html'); if(d[k]!==undefined) el.innerHTML=d[k]; });
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
+}
+document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>{ lang=b.dataset.lang; applyLang(); }));
+</script>
 </body>
 </html>

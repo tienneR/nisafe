@@ -77,6 +77,16 @@
   .lang-btn{font:inherit;font-size:.75rem;font-weight:600;padding:6px 11px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.14s;}
   .lang-btn:hover{color:var(--text);}
   .lang-btn.active{background:var(--accent);color:#fff;}
+  .help-btn{width:32px;padding:6px 0;font-weight:700;font-size:.95rem;text-align:center;}
+  .help-pop{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:70px 16px;background:rgba(10,15,22,.4);}
+  .help-pop[hidden]{display:none;}
+  .help-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);max-width:440px;width:100%;padding:22px;}
+  .help-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:1.08rem;letter-spacing:-.01em;}
+  .help-x{background:none;border:0;font-size:1rem;cursor:pointer;color:var(--muted);padding:4px;line-height:1;}
+  .help-x:hover{color:var(--text);}
+  .help-list{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:9px;font-size:.9rem;color:var(--text);}
+  .help-list li{line-height:1.45;}
+  .help-tip{margin:16px 0 0;font-size:.85rem;color:var(--muted);background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;line-height:1.45;}
 
   /* Hero / intro */
   .intro{margin:8px 0 30px;}
@@ -269,6 +279,17 @@
   .allgood{padding:26px 22px;text-align:center;color:var(--good);font-weight:600;}
 
   .report-actions{padding:18px 22px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;}
+  .final-block{text-align:center;padding:26px 20px 6px;}
+  .final-note{color:var(--muted);font-size:.92rem;margin:0 auto 14px;max-width:52ch;line-height:1.5;}
+  .dp-body .fr-list{list-style:none;padding-left:0;margin:0;}
+  .dp-body .fr-list li{margin:0 0 13px;line-height:1.5;}
+  .fr-sev{display:inline-block;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    padding:1px 7px;border-radius:5px;margin-right:8px;background:transparent;vertical-align:middle;}
+  .fr-sev.critica{color:#CE343C;border:1px solid #CE343C;}
+  .fr-sev.alta{color:#B4451A;border:1px solid #B4451A;}
+  .fr-sev.media{color:#8A5A12;border:1px solid #8A5A12;}
+  .fr-sev.bassa{color:#586377;border:1px solid #9CA3AF;}
+  .fr-area{display:block;font-family:var(--font-mono);font-size:.72rem;color:#6B7280;margin-top:2px;}
 
   /* About */
   .about{margin:26px 0 8px;border-radius:16px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);
@@ -432,6 +453,7 @@
       <button class="lang-btn active" data-lang="it" type="button">IT</button>
       <button class="lang-btn" data-lang="en" type="button">EN</button>
     </div>
+    <button class="ghost-btn help-btn" id="helpBtn" title="Come funziona" aria-label="Come funziona">?</button>
     <button class="ghost-btn" id="demoBtn" data-i18n="demo_fill">Dati di esempio</button>
     <button class="ghost-btn" id="resetBtn" data-i18n="reset">Ricomincia</button>
   </div>
@@ -573,8 +595,7 @@
         <div class="stat-row" id="stats"></div>
         <div class="road" id="road"></div>
         <div class="report-actions">
-          <button class="cta" style="width:auto" id="docGenBtn" data-i18n="docgen">Genera i documenti di conformità →</button>
-          <button class="ghost-btn" onclick="window.print()" data-i18n="print">Esporta / Stampa report</button>
+          <button class="cta" style="width:auto;margin:0" id="docGenBtn" data-i18n="docgen">Genera i documenti di conformità →</button>
         </div>
       </section>
     <div class="tabnav">
@@ -611,6 +632,10 @@
       </div>
       <div id="scanResult" hidden></div>
     </section>
+    <div class="final-block">
+      <p class="final-note" data-i18n="fr_note">Hai completato il percorso. Scarica il report finale con tutto ciò che devi sistemare.</p>
+      <button class="cta" style="width:auto;margin:0" id="finalReportBtn" data-i18n="final_pdf">⬇ Scarica il report finale (PDF)</button>
+    </div>
     <div class="tabnav">
       <button class="ghost-btn nav-adv" data-goto="3" data-i18n="back">← Indietro</button>
       <span></span>
@@ -620,6 +645,20 @@
   <p class="disclaimer" data-i18n-html="disclaimer">
     <b>Nota.</b> Questo strumento fornisce una valutazione <b>indicativa e automatizzata</b> a scopo di orientamento e non costituisce consulenza legale né garanzia di conformità. L'ambito di applicazione definitivo e la classificazione dell'entità (essenziale / importante) dipendono dal recepimento nazionale della direttiva e vanno verificati con l'autorità competente (in Italia, ACN). La responsabilità della conformità resta in capo all'organizzazione e al suo organo di gestione.
   </p>
+</div>
+
+<div class="help-pop" id="helpPop" hidden>
+  <div class="help-card">
+    <div class="help-head"><b data-i18n="help_title">Come funziona</b><button class="help-x" id="helpClose" aria-label="Chiudi">✕</button></div>
+    <ol class="help-list">
+      <li data-i18n="help_1">Ambito — scopri se la NIS2 ti riguarda (settore + dimensione).</li>
+      <li data-i18n="help_2">Autovalutazione — rispondi alle domande sulle misure dell'art. 21.</li>
+      <li data-i18n="help_3">Report — vedi il tuo livello e cosa manca, per priorità.</li>
+      <li data-i18n="help_4">Documenti — genera e scarica i documenti di conformità (PDF).</li>
+      <li data-i18n="help_5">Scanner — controlla la superficie esterna e scarica il report finale.</li>
+    </ol>
+    <p class="help-tip" data-i18n="help_tip">Suggerimento: premi "Dati di esempio" per vedere subito com'è fatto.</p>
+  </div>
 </div>
 
 <div id="printArea" aria-hidden="true"></div>
@@ -747,6 +786,13 @@ const EN = {
 };
 const T = {
   it:{ brand_tag:"Conformità NIS2 in autonomia", reset:"Ricomincia", demo_fill:"Dati di esempio",
+    help_title:"Come funziona",
+    help_1:"Ambito — scopri se la NIS2 ti riguarda (settore + dimensione).",
+    help_2:"Autovalutazione — rispondi alle domande sulle misure dell'art. 21.",
+    help_3:"Report — vedi il tuo livello e cosa manca, per priorità.",
+    help_4:"Documenti — genera e scarica i documenti di conformità (PDF).",
+    help_5:"Scanner — controlla la superficie esterna e scarica il report finale.",
+    help_tip:"Suggerimento: premi \"Dati di esempio\" per vedere subito com'è fatto.",
     eyebrow:"Autovalutazione · Direttiva UE 2022/2555",
     h1:"Metti in regola la tua azienda con la <span class=\"hl\">NIS2</span>. Da solo, in 5 minuti.",
     intro_p:"Rispondi alle domande sulle misure di sicurezza previste dall'art. 21.<br>NISafe calcola il tuo livello di conformità e genera una <strong>roadmap prioritizzata</strong> e i <strong>documenti</strong> pronti. Nessuna consulenza, nessun costo nascosto.",
@@ -769,6 +815,7 @@ const T = {
     opt_si:"Sì", opt_parz:"Parziale", opt_no:"No", opt_na:"N.A.",
     leg_si:"Sì", leg_parz:"Parziale", leg_no:"No",
     report_h2:"Gap report NIS2", docgen:"Genera i documenti di conformità →", print:"Esporta / Stampa report",
+    final_pdf:"⬇ Scarica il report finale (PDF)", fr_note:"Hai completato il percorso. Scarica il report finale con tutto ciò che devi sistemare.",
     st_comp:"Conformità stimata", st_prio:"Interventi prioritari", st_med:"A media priorità", st_gaps:"Gap totali rilevati",
     road_h:"Roadmap prioritizzata", road_sub:"Interventi ordinati per priorità, calcolata su criticità dell'area × ampiezza del gap.",
     allgood:"✓ Nessun gap rilevato sulle risposte fornite. Ottimo lavoro — mantieni le evidenze aggiornate.",
@@ -792,6 +839,13 @@ const T = {
     v_imp_t:"Probabile entità importante", v_imp_d:"Rientri con ogni probabilità tra le entità importanti: obblighi dell'art. 21 e notifica degli incidenti, con vigilanza ex-post. Procedi con l'autovalutazione qui sotto.",
   },
   en:{ brand_tag:"NIS2 compliance, on your own", reset:"Start over", demo_fill:"Sample data",
+    help_title:"How it works",
+    help_1:"Scope — find out if NIS2 applies to you (sector + size).",
+    help_2:"Self-assessment — answer the questions on the Article 21 measures.",
+    help_3:"Report — see your level and what's missing, by priority.",
+    help_4:"Documents — generate and download the compliance documents (PDF).",
+    help_5:"Scanner — check the external surface and download the final report.",
+    help_tip:"Tip: press \"Sample data\" to instantly see what it looks like.",
     eyebrow:"Self-assessment · EU Directive 2022/2555",
     h1:"Get your company <span class=\"hl\">NIS2</span>-ready. On your own, in 5 minutes.",
     intro_p:"Answer the questions on the security measures required by Article 21.<br>NISafe calculates your compliance level and generates a <strong>prioritised roadmap</strong> and ready-to-use <strong>documents</strong>. No consultants, no hidden costs.",
@@ -814,6 +868,7 @@ const T = {
     opt_si:"Yes", opt_parz:"Partial", opt_no:"No", opt_na:"N/A",
     leg_si:"Yes", leg_parz:"Partial", leg_no:"No",
     report_h2:"NIS2 gap report", docgen:"Generate compliance documents →", print:"Export / Print report",
+    final_pdf:"⬇ Download the final report (PDF)", fr_note:"You've completed the process. Download the final report with everything you need to fix.",
     st_comp:"Estimated compliance", st_prio:"Priority actions", st_med:"Medium priority", st_gaps:"Total gaps found",
     road_h:"Prioritised roadmap", road_sub:"Actions ordered by priority, computed as area criticality × size of the gap.",
     allgood:"✓ No gaps found on the answers provided. Great work — keep your evidence up to date.",
@@ -963,6 +1018,7 @@ function sevOf(w,gap){ // gap: 1 (No) or .5 (Parziale)
   return 'bassa';
 }
 const SEV_ORDER={critica:0,alta:1,media:2,bassa:3};
+let LAST_REPORT=null;
 function applyReportFilter(rf, cell){
   const stats=document.getElementById('stats');
   stats.querySelectorAll('.rf-cell').forEach(x=>x.classList.toggle('active', x===cell));
@@ -1000,6 +1056,7 @@ function genReport(scroll){
   let wSum=0,wTot=0;
   MEASURES.forEach((m,mi)=>{const s=measureScore(mi); if(s.pct!==null){wSum+=s.pct*m.w;wTot+=m.w;}});
   const overall=wTot?Math.round(wSum/wTot):0;
+  LAST_REPORT={tasks,overall,counts};
 
   document.getElementById('reportDate').textContent = tr('rep_date')
     .replace('{date}', new Date().toLocaleDateString(lang==='en'?'en-GB':'it-IT',{day:'2-digit',month:'long',year:'numeric'}))
@@ -1551,6 +1608,46 @@ window.addEventListener('afterprint',()=>{
   document.body.classList.remove('printing-doc');
   const pa=document.getElementById('printArea'); if(pa) pa.innerHTML='';
 });
+function buildFinalReportHTML(){
+  const p=getProfile();
+  const r=LAST_REPORT||{tasks:[],overall:0,counts:{critica:0,alta:0,media:0,bassa:0}};
+  const en=lang==='en';
+  const title=en?'NIS2 Compliance Report':'Report di conformità NIS2';
+  const meta=[
+    [en?'Document':'Documento','REP-NIS2'],
+    [en?'Date':'Data',p.date],
+    [en?'Entity (indicative)':'Entità (indicativa)',p.entity],
+    [en?'Profile':'Profilo',p.sectorLabel+' — '+p.sizeLabel],
+    [en?'Estimated compliance':'Conformità stimata',r.overall+'%'],
+  ];
+  const level=r.overall<45?(en?'Critical level: many gaps to close.':'Livello critico: molti gap da colmare.')
+            :r.overall<75?(en?'Partial level: room for improvement.':'Livello parziale: margini di miglioramento.')
+            :(en?'Good maturity level.':'Buon livello di maturità.');
+  const scope=en?`Based on sector and size, the entity is classified as <b>${p.entity}</b>. Indicative classification, to be verified with the competent authority.`
+                :`In base a settore e dimensione, l'entità è classificata come <b>${p.entity}</b>. Classificazione indicativa, da verificare con l'autorità competente.`;
+  const actions=r.tasks.length===0
+    ? `<p>✓ ${en?'No gaps found on the answers provided.':'Nessun gap rilevato sulle risposte fornite.'}</p>`
+    : `<ul class="fr-list">${r.tasks.map(t=>`<li><span class="fr-sev ${t.sev}">${tr('sev_'+t.sev)}</span><b>${escapeHtml(t.action)}</b><span class="fr-area">${escapeHtml(t.area)}</span></li>`).join('')}</ul>`;
+  return `
+    <div class="dp-head"><div class="dp-brand">${DOC_LOGO}NISafe</div><div class="dp-code">REP-NIS2</div></div>
+    <h1 class="dp-title">${title}</h1>
+    <div class="dp-company">${escapeHtml(p.name)}</div>
+    <table class="dp-meta"><tbody>${meta.map(row=>`<tr><td>${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join('')}</tbody></table>
+    <div class="dp-body">
+      <h3>${en?'1. Scope of application':'1. Ambito di applicazione'}</h3><p>${scope}</p>
+      <h3>${en?'2. Compliance level':'2. Livello di conformità'}</h3><p><b>${r.overall}%</b> — ${level}</p>
+      <h3>${en?'3. Actions to take':'3. Interventi da fare'}</h3>${actions}
+    </div>
+    <div class="dp-foot">${en?'Report generated by NISafe. Indicative and automated assessment, not legal advice.':'Report generato da NISafe. Valutazione indicativa e automatizzata, non consulenza legale.'}</div>`;
+}
+function printFinalReport(){
+  if(!LAST_REPORT) genReport(false);
+  const pa=document.getElementById('printArea');
+  pa.innerHTML='<div class="doc-page">'+buildFinalReportHTML()+'</div>';
+  document.body.classList.add('printing-doc');
+  window.print();
+}
+document.getElementById('finalReportBtn').addEventListener('click',printFinalReport);
 document.getElementById('docGenBtn').addEventListener('click',()=>{ genDocs(false); showTab(3); });
 document.getElementById('docList').addEventListener('click',e=>{
   const ed=e.target.closest('[data-edit]'), pd=e.target.closest('[data-pdf]');
@@ -1741,6 +1838,10 @@ function populateDemo(){
   showTab(0);
 }
 document.getElementById('demoBtn').addEventListener('click',populateDemo);
+document.getElementById('helpBtn').addEventListener('click',()=>{ document.getElementById('helpPop').hidden=false; });
+document.getElementById('helpClose').addEventListener('click',()=>{ document.getElementById('helpPop').hidden=true; });
+document.getElementById('helpPop').addEventListener('click',e=>{ if(e.target.id==='helpPop') e.currentTarget.hidden=true; });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.getElementById('helpPop').hidden=true; });
 
 // ---- tabs ----
 function showTab(i){
